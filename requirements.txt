@@ -1,0 +1,139 @@
+###############################################################################
+#  COMBINADO — App do Guardião · REQUIREMENTS (tecnologias e versões)
+#  ---------------------------------------------------------------------------
+#  Este arquivo é a REFERÊNCIA DE VERSÕES do projeto. Ele não é executado
+#  automaticamente (não é um requirements.txt de Python) — serve como a fonte
+#  única de "qual versão de cada coisa" para o Claude Code seguir na Fase 0.
+#
+#  Formato de cada linha:  <pacote>  <versão-alvo>   # camada · observação
+#  A "versão-alvo" usa o padrão do npm:
+#     ^X.Y.Z  = aceita atualizações de patch/minor dentro do mesmo major
+#               (recomendado — o pnpm-lock.yaml trava a versão exata real)
+#     X.Y.Z   = versão fixa exata (usada onde o major importa muito)
+#
+#  IMPORTANTE: as versões abaixo refletem o estado do ecossistema no momento
+#  em que este plano foi escrito. Antes de instalar, o Claude Code deve rodar
+#  `pnpm outdated` / checar o npm e usar a última PATCH/MINOR compatível do
+#  mesmo MAJOR. NÃO subir de major sem revisar breaking changes.
+###############################################################################
+
+
+# =============================================================================
+# 0) PRÉ-REQUISITOS DE AMBIENTE  (instalar ANTES de tudo — não são pacotes npm)
+# =============================================================================
+# Node.js        >= 22.12.0     # OBRIGATÓRIO. Vite 7 exige Node 20.19+ OU 22.12+.
+#                               # Use a linha 22 LTS para não ter surpresa.
+# pnpm           >= 9.0.0       # gerenciador de pacotes do monorepo (workspaces)
+# supabase CLI   >= 2.0.0       # gerência de migrations e Edge Functions
+# git            qualquer atual # controle de versão
+#
+# Verificação:  node -v  ·  pnpm -v  ·  npx supabase --version  ·  git --version
+
+
+# =============================================================================
+# 1) RAIZ DO MONOREPO  (devDependencies compartilhadas)
+# =============================================================================
+typescript              ^5.9.0     # raiz · linguagem, modo strict
+@types/node             ^22.0.0    # raiz · tipos do Node (casar com o major do Node)
+
+
+# =============================================================================
+# 2) apps/web  — APP DO GUARDIÃO (React + Vite + TS)
+# =============================================================================
+# --- núcleo React / build ---
+react                   ^19.2.0    # web · biblioteca de UI (major 19)
+react-dom               ^19.2.0    # web · render DOM (casar com react)
+vite                    ^7.0.0     # web · build/dev server (exige Node 20.19+/22.12+)
+@vitejs/plugin-react    ^5.0.0     # web · plugin React para o Vite
+typescript              ^5.9.0     # web · (herda da raiz; repetido p/ clareza)
+
+# --- estilização (Tailwind v4 — SETUP NOVO, ver nota abaixo) ---
+tailwindcss             ^4.3.0     # web · Tailwind v4 (NÃO usa mais init -p)
+@tailwindcss/vite       ^4.3.0     # web · plugin oficial do Tailwind p/ Vite
+#   ATENÇÃO Tailwind v4: NÃO instalar postcss nem autoprefixer (embutidos),
+#   NÃO rodar `npx tailwindcss init -p`, NÃO criar tailwind.config.js.
+#   A config vive no CSS: `@import "tailwindcss";` + bloco `@theme { ... }`.
+
+# --- componentes / UI ---
+#   shadcn/ui NÃO é uma dependência: é instalado via CLI e copia os componentes
+#   para dentro de src/components/ui. Comando: `pnpm dlx shadcn@latest init`.
+#   Ele adiciona sozinho as libs abaixo conforme os componentes escolhidos:
+class-variance-authority ^0.7.0    # web · variantes de classe (shadcn)
+clsx                    ^2.1.0     # web · junção de classes (shadcn)
+tailwind-merge          ^3.0.0     # web · merge de classes Tailwind (shadcn)
+lucide-react            ^0.5.0     # web · ícones (shadcn) — usar última do momento
+vaul                    ^1.1.0     # web · drawers nativos no mobile
+
+# --- dados / estado / rotas ---
+@supabase/supabase-js   ^2.40.0    # web · cliente Supabase (anon key)
+@tanstack/react-query   ^5.101.0   # web · estado de servidor / cache
+react-router-dom        ^7.0.0     # web · roteamento (major 7)
+
+# --- PWA ---
+vite-plugin-pwa         ^1.0.0     # web · manifest + service worker (instalável)
+
+
+# =============================================================================
+# 3) apps/service  — SERVIÇO NODE (Gateway / Risk / Orchestrator / HTTP)
+# =============================================================================
+# --- runtime / build ---
+typescript              ^5.9.0     # service · (herda da raiz)
+tsx                     ^4.19.0    # service · executar TS em dev sem compilar
+@types/node             ^22.0.0    # service · tipos do Node
+
+# --- captura WhatsApp ---
+@whiskeysockets/baileys 6.17.16    # service · Baileys ESTÁVEL (linha 6). Ver nota.
+#   NOTA Baileys: a linha 7 (7.0.0-rc*) tem breaking changes e ainda é release
+#   candidate. Para o MVP, fixar a 6.17.16 (estável, mais documentação). Migrar
+#   para 7.x depois, lendo https://baileys.wiki/docs/migration/to-v7.0.0/ .
+#   Existe também o pacote `baileys` (sem escopo) como espelho; usar UM só.
+qrcode-terminal         ^0.12.0    # service · mostrar QR de pareamento no terminal (dev)
+
+# --- banco / fila ---
+@supabase/supabase-js   ^2.40.0    # service · cliente com service_role
+
+# --- servidor HTTP p/ webhooks (Twilio/WhatsApp) ---
+hono                    ^4.6.0     # service · servidor HTTP leve e rápido
+@hono/node-server       ^1.13.0   # service · adaptador do Hono para Node
+
+# --- canais de intervenção ---
+twilio                  ^5.3.0     # service · SDK Twilio (ligação/SMS)
+web-push                ^3.6.0     # service · Web Push (VAPID) ao guardião
+#   WhatsApp Business (Cloud API): NÃO tem SDK obrigatório — é chamada HTTP à
+#   Graph API da Meta. Pode-se usar o `fetch` nativo do Node; SDK é opcional.
+
+# --- validação / utilidades ---
+zod                     ^3.23.0    # service · validar env, payloads, JSON do LLM
+
+# --- LLM (motor de risco, camada de apoio) ---
+@anthropic-ai/sdk       ^0.30.0    # service · SDK da API Claude (classificação de apoio)
+
+
+# =============================================================================
+# 4) packages/shared  — TIPOS E CONTRATOS COMPARTILHADOS
+# =============================================================================
+typescript              ^5.9.0     # shared · compila os tipos exportados
+#   Sem dependências de runtime: só exporta tipos gerados do Supabase
+#   (db-types.ts) e os contratos (contracts.ts). Os tipos são gerados por:
+#   `npx supabase gen types typescript --linked > src/db-types.ts`
+
+
+# =============================================================================
+# 5) supabase/functions  — EDGE FUNCTIONS (Deno, NÃO npm)
+# =============================================================================
+#   As Edge Functions rodam em Deno, não em Node. NÃO entram no pnpm/workspace
+#   e NÃO usam este esquema de versão. As dependências são importadas por URL
+#   dentro de cada function (ex.: import { createClient } from
+#   "jsr:@supabase/supabase-js@2"). Versão fixada na própria URL de import.
+#   Deploy: `npx supabase functions deploy <nome>`.
+
+
+###############################################################################
+#  RESUMO DE TRAVAS DE COMPATIBILIDADE (as que mais quebram se ignoradas)
+#  ---------------------------------------------------------------------------
+#  • Node 22.12+  ................ exigência do Vite 7. Checar ANTES de instalar.
+#  • Tailwind v4  ................ setup por CSS (@theme), sem init/postcss.
+#  • Baileys 6.x  ................ manter estável no MVP; 7.x é RC com breaking.
+#  • React 19 + react-dom 19 ..... sempre no mesmo major.
+#  • Edge Functions (Deno) ....... versão vem na URL de import, não aqui.
+###############################################################################
