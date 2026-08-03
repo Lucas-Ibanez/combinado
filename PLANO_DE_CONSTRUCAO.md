@@ -49,7 +49,7 @@
 
 ---
 
-### - [ ] T0.1 — Pré-requisitos de ambiente
+### - [x] T0.1 — Pré-requisitos de ambiente
 **O que será feito:** garantir que a máquina tem as ferramentas-base nas versões exigidas, **antes** de instalar qualquer pacote. Ver seção 0 do `requirements.txt`.
 - Node.js **22.12+** (exigência do Vite 7 — versões menores quebram o build).
 - **pnpm** 9+ (gerenciador do monorepo).
