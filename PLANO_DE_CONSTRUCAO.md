@@ -359,7 +359,7 @@ Configurar visibility timeout e uma **dead-letter** por fila.
 
 ---
 
-### - [ ] T1.6 — Configurar Auth e ativar MFA (TOTP)
+### - [x] T1.6 — Configurar Auth e ativar MFA (TOTP)
 **O que será feito:** habilitar login por e-mail/senha (e magic link, se quiser) e ativar **MFA por TOTP** — obrigatório para o guardião, por ser conta de alto valor. Passkeys ficam para depois.
 
 **Como garantir que foi feito corretamente:** um usuário de teste consegue se cadastrar e ativar o segundo fator (TOTP) no painel/fluxo do Supabase.
