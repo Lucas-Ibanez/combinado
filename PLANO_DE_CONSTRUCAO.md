@@ -327,7 +327,7 @@ npx supabase db push
 
 ---
 
-### - [ ] T1.3 — Schema isolado para as chaves do Baileys
+### - [x] T1.3 — Schema isolado para as chaves do Baileys
 **O que será feito:** criar um **schema separado** (ex.: `vault_baileys`) para a tabela `baileys_sessions` — o material criptográfico da sessão. Isolado do schema `public`, com acesso restrito a uma role de serviço própria (não a `service_role` geral). Só o Session Gateway toca aqui.
 
 **Como garantir que foi feito corretamente:** o schema `vault_baileys` existe e **não** é alcançável pelas policies/roles do app (um cliente com a `anon key` não consegue lê-lo).
