@@ -389,7 +389,7 @@ npx supabase gen types typescript --linked > packages/shared/src/db-types.ts
 
 ---
 
-### - [ ] T2.1 — Criar a pasta de functions e o módulo `_shared`
+### - [x] T2.1 — Criar a pasta de functions e o módulo `_shared`
 **O que será feito:** estruturar `supabase/functions/` e escrever no `_shared/` os utilitários que toda function usa: verificação do JWT do usuário (auth guard), checagem do vínculo guardião↔protegido, helper de **rate limit** e de **idempotency key**.
 
 **Comandos:**
