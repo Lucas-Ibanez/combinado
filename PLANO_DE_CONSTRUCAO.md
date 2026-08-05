@@ -336,7 +336,7 @@ npx supabase db push
 
 ---
 
-### - [ ] T1.4 — Habilitar RLS e escrever as policies por família
+### - [x] T1.4 — Habilitar RLS e escrever as policies por família
 **O que será feito:** ligar Row Level Security em **todas** as tabelas de aplicação. Policy central: um guardião só lê/escreve linhas cujo `family_id` pertence a uma família à qual ele está vinculado (via `guardian_links`). Indexar as colunas usadas nas policies.
 
 **Como garantir que foi feito corretamente:** com dois guardiões de teste em famílias diferentes, o guardião A **não** consegue ler nenhum dado da família do guardião B (testar com a `anon key` + sessão de cada um).
