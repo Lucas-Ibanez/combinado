@@ -143,7 +143,7 @@ apps/service/keys/
 
 ---
 
-### - [ ] T0.5 — Linkar a Supabase CLI ao projeto
+### - [x] T0.5 — Linkar a Supabase CLI ao projeto
 **O que será feito:** inicializar a config local do Supabase e vincular ao projeto remoto (T0.2). Isso cria `supabase/config.toml` e habilita gerenciar migrations e Edge Functions por CLI.
 
 **Comandos:**
