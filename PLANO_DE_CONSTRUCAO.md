@@ -454,7 +454,7 @@ npx supabase functions deploy pair-device
 
 ---
 
-### - [ ] T3.1 — Configurar o cliente Supabase e as variáveis do front
+### - [x] T3.1 — Configurar o cliente Supabase e as variáveis do front
 **O que será feito:** criar `apps/web/src/lib/supabase.ts` com o cliente usando a `anon key` via `import.meta.env`. Criar `.env.local` (gitignored) com `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`.
 
 **Como garantir que foi feito corretamente:** o app faz uma chamada trivial ao Supabase (ex.: `auth.getSession()`) e recebe resposta sem erro de credencial.
