@@ -311,7 +311,7 @@ cd ../..
 
 ---
 
-### - [ ] T1.2 — Migration inicial (tabelas de aplicação)
+### - [x] T1.2 — Migration inicial (tabelas de aplicação)
 **O que será feito:** criar a primeira migration com as tabelas de T1.1. PKs UUID, `created_at`/`updated_at`, e `family_id` em tudo que é escopável por família.
 
 **Comandos:**
