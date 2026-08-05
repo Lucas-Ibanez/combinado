@@ -81,7 +81,7 @@ Todos respondem sem erro e o Node está na faixa exigida.
 
 ---
 
-### - [ ] T0.3 — Criar o repositório único e clonar
+### - [x] T0.3 — Criar o repositório único e clonar
 **O que será feito:** criar **um** repositório privado `combinado` no GitHub (monorepo — não dois repos) e cloná-lo localmente. O Claude Code opera a partir dessa pasta.
 
 **Como garantir que foi feito corretamente:** o repo existe no GitHub, está clonado, e `git status` responde dentro da pasta.
