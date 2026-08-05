@@ -292,7 +292,7 @@ cd ../..
 
 ---
 
-### - [ ] T1.1 — Desenhar o modelo lógico das entidades
+### - [x] T1.1 — Desenhar o modelo lógico das entidades
 **O que será feito:** antes de escrever SQL, mapear entidades, colunas-chave e relações. Conjunto mínimo do MVP:
 - `families` — a unidade (a "família").
 - `guardians` — usuários guardiões (liga ao Supabase Auth).
