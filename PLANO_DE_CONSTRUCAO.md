@@ -177,7 +177,7 @@ cd ../..
 
 ---
 
-### - [ ] T0.7 — Scaffold e instalação do `apps/web`
+### - [x] T0.7 — Scaffold e instalação do `apps/web`
 **O que será feito:** criar o app React+Vite+TS e instalar **todas** as dependências do front listadas no `requirements.txt` (seção 2), já com o setup **correto do Tailwind v4**.
 
 **Comandos:**
