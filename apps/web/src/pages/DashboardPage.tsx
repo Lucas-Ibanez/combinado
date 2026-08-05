@@ -1,4 +1,7 @@
+import type { Incident } from '@combinado/shared'
 import { useSession } from '@/hooks/useSession'
+
+const recentIncidents: Incident[] = []
 
 export default function DashboardPage() {
   const { data: session, isLoading } = useSession()
@@ -10,6 +13,9 @@ export default function DashboardPage() {
       <p className="text-sm text-text-muted mt-4">
         Sessão: {isLoading ? 'carregando...' : session ? session.user.email : 'não logado'}
       </p>
+      {recentIncidents.length === 0 && (
+        <p className="text-sm text-text-muted mt-2">Nenhum incidente recente.</p>
+      )}
     </div>
   )
 }

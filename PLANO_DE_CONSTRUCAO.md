@@ -492,7 +492,7 @@ npx supabase functions deploy pair-device
 
 ---
 
-### - [ ] T3.4 — Importar os tipos de `@combinado/shared`
+### - [x] T3.4 — Importar os tipos de `@combinado/shared`
 **O que será feito:** adicionar `@combinado/shared` como dependência do workspace `web` e usar um tipo do banco no app, validando que o monorepo compartilha tipos sem gambiarra.
 
 **Comandos:**
