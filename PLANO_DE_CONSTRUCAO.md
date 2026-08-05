@@ -90,7 +90,7 @@ Todos respondem sem erro e o Node está na faixa exigida.
 
 ---
 
-### - [ ] T0.4 — Montar a estrutura de pastas e arquivos do monorepo
+### - [x] T0.4 — Montar a estrutura de pastas e arquivos do monorepo
 **O que será feito:** criar **toda** a árvore de diretórios e os arquivos-esqueleto de uma vez, para fixar a organização antes de escrever qualquer lógica. Criar também os arquivos de configuração da raiz (`package.json`, `pnpm-workspace.yaml`, `.gitignore`, `README.md`).
 
 **Comandos (estrutura de pastas):**
