@@ -345,7 +345,7 @@ npx supabase db push
 
 ---
 
-### - [ ] T1.5 — Habilitar PGMQ e criar as filas
+### - [x] T1.5 — Habilitar PGMQ e criar as filas
 **O que será feito:** ativar a extensão de filas (PGMQ / Supabase Queues) por migration e criar as filas do MVP:
 - `risk_queue` — eventos capturados → Risk Worker.
 - `command_outbox` — jobs publicados pela Command API → serviço.
