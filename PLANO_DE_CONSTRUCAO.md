@@ -506,7 +506,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T3.5 — Telas de cadastro e login (Supabase Auth)
+### - [x] T3.5 — Telas de cadastro e login (Supabase Auth)
 **O que será feito:** construir as telas de signup e login usando o Supabase Auth. Tratar estados de erro com clareza e no tom calmo do design.
 
 **Como garantir que foi feito corretamente:** um usuário consegue se cadastrar e fazer login pelo app.

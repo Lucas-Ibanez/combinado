@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import ProtectedRoute from '@/components/common/ProtectedRoute'
 import AppLayout from '@/components/common/AppLayout'
 import DashboardPage from '@/pages/DashboardPage'
 import IncidentsPage from '@/pages/IncidentsPage'
@@ -22,11 +23,13 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route element={<AppLayout />}>
-            <Route index element={<DashboardPage />} />
-            <Route path="incidents" element={<IncidentsPage />} />
-            <Route path="simulations" element={<SimulationsPage />} />
-            <Route path="settings" element={<SettingsPage />} />
+          <Route element={<ProtectedRoute />}>
+            <Route element={<AppLayout />}>
+              <Route index element={<DashboardPage />} />
+              <Route path="incidents" element={<IncidentsPage />} />
+              <Route path="simulations" element={<SimulationsPage />} />
+              <Route path="settings" element={<SettingsPage />} />
+            </Route>
           </Route>
         </Routes>
       </BrowserRouter>
