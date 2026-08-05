@@ -228,7 +228,7 @@ cd apps/web && pnpm dev
 
 ---
 
-### - [ ] T0.8 — Scaffold e instalação do `apps/service`
+### - [x] T0.8 — Scaffold e instalação do `apps/service`
 **O que será feito:** criar o workspace do serviço Node e instalar **todas** as dependências de backend do `requirements.txt` (seção 3), incluindo Baileys estável, Hono (webhooks), Twilio, Web Push, Zod e o SDK da Anthropic.
 
 **Comandos:**

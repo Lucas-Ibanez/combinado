@@ -1,2 +1,1 @@
-// Bootstrap: sobe os três papéis + http
-export {}
+console.log('serviço no ar')
