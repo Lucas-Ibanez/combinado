@@ -368,7 +368,7 @@ Configurar visibility timeout e uma **dead-letter** por fila.
 
 ---
 
-### - [ ] T1.7 — Gerar os tipos no pacote `shared`
+### - [x] T1.7 — Gerar os tipos no pacote `shared`
 **O que será feito:** gerar os tipos TypeScript do schema direto para dentro de `packages/shared` — é a fonte única de tipos para app e serviço. Preencher também `contracts.ts` com os formatos de comando/evento/incidente conforme já conhecidos.
 
 **Comandos:**
