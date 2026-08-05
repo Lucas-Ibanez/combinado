@@ -483,7 +483,7 @@ npx supabase functions deploy pair-device
 
 ---
 
-### - [ ] T3.3 — Roteamento + TanStack Query
+### - [x] T3.3 — Roteamento + TanStack Query
 **O que será feito:** configurar o React Router (rotas) e o TanStack Query (provider na raiz). Estabelecer o padrão "buscar estado autoritativo" que a F8 vai reusar.
 
 **Como garantir que foi feito corretamente:** há rotas navegáveis e o Query provider está ativo (um hook de leitura de teste funciona).

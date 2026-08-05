@@ -1,55 +1,35 @@
-import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import AppLayout from '@/components/common/AppLayout'
+import DashboardPage from '@/pages/DashboardPage'
+import IncidentsPage from '@/pages/IncidentsPage'
+import SimulationsPage from '@/pages/SimulationsPage'
+import SettingsPage from '@/pages/SettingsPage'
+import LoginPage from '@/pages/LoginPage'
 
-function App() {
-  const [status, setStatus] = useState('checking...')
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 30,
+      retry: 1,
+    },
+  },
+})
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ error }) => {
-      setStatus(error ? `error: ${error.message}` : 'connected')
-    })
-  }, [])
-
+export default function App() {
   return (
-    <div className="min-h-screen bg-surface p-8 font-sans">
-      <h1 className="text-3xl font-bold text-text mb-2">Combinado — Design Tokens</h1>
-      <p className="text-text-muted mb-6">Supabase: {status}</p>
-
-      <div className="grid grid-cols-1 gap-4 max-w-md">
-        <div className="rounded-lg p-4 bg-brand text-brand-foreground">
-          bg-brand (modo normal)
-        </div>
-        <div className="rounded-lg p-4 bg-brand-light text-brand-foreground">
-          bg-brand-light
-        </div>
-        <div className="rounded-lg p-4 bg-brand-surface text-text border border-border">
-          bg-brand-surface
-        </div>
-
-        <div className="rounded-lg p-4 bg-attention text-attention-foreground">
-          bg-attention (modo atenção)
-        </div>
-        <div className="rounded-lg p-4 bg-attention-surface text-text border border-border">
-          bg-attention-surface
-        </div>
-
-        <div className="rounded-lg p-4 bg-danger text-danger-foreground">
-          bg-danger (SÓ modo incidente)
-        </div>
-        <div className="rounded-lg p-4 bg-danger-surface text-text border border-border">
-          bg-danger-surface
-        </div>
-
-        <div className="rounded-lg p-4 bg-success text-white">
-          bg-success
-        </div>
-
-        <div className="rounded-lg p-4 bg-surface-muted text-text-muted border border-border">
-          bg-surface-muted + text-text-muted
-        </div>
-      </div>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route element={<AppLayout />}>
+            <Route index element={<DashboardPage />} />
+            <Route path="incidents" element={<IncidentsPage />} />
+            <Route path="simulations" element={<SimulationsPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
   )
 }
-
-export default App
