@@ -422,7 +422,7 @@ npx supabase functions new start-simulation
 
 ---
 
-### - [ ] T2.4 — `pair-device`
+### - [x] T2.4 — `pair-device`
 **O que será feito:** function que inicia o pareamento do Baileys para um protegido: valida o guardião e enfileira um job que o Session Gateway consome para gerar o QR/código. O QR volta pelo estado no banco (o app lê e exibe).
 
 **Como garantir que foi feito corretamente:** a chamada enfileira o pedido de pareamento em `command_outbox` sem erro, e o registro do protegido reflete o estado "aguardando pareamento".
