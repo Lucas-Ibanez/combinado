@@ -271,7 +271,7 @@ cd ../..
 
 ---
 
-### - [ ] T0.9 — Verificação final da Fase 0 (tudo compila e roda vazio)
+### - [x] T0.9 — Verificação final da Fase 0 (tudo compila e roda vazio)
 **O que será feito:** confirmar que o monorepo inteiro está de pé antes de escrever lógica.
 
 **Como garantir que foi feito corretamente:**
