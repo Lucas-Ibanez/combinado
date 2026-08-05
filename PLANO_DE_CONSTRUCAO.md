@@ -413,7 +413,7 @@ npx supabase functions new start-simulation
 
 ---
 
-### - [ ] T2.3 — `acknowledge-incident`
+### - [x] T2.3 — `acknowledge-incident`
 **O que será feito:** function que recebe a confirmação do guardião sobre um incidente. Valida vínculo, registra `acknowledged_at`/`acknowledged_by` e muda o estado do incidente. É o que "para" a escada de entrega quando uma pessoa confirma.
 
 **Como garantir que foi feito corretamente:** confirmar um incidente muda seu estado no banco e gera uma entrada no `audit_log`.
