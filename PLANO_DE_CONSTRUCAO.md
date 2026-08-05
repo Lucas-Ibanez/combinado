@@ -404,7 +404,7 @@ npx supabase functions new start-simulation
 
 ---
 
-### - [ ] T2.2 — `start-simulation` (a function-template)
+### - [x] T2.2 — `start-simulation` (a function-template)
 **O que será feito:** a primeira Command API, que serve de molde para as demais. Fluxo: valida o guardião → confirma que ele guarda aquele protegido → checa cooldown/limite → numa **única transação**, grava a `simulation` e publica um job em `command_outbox`. Nunca dispara nada diretamente; só enfileira (transactional outbox).
 
 **Como garantir que foi feito corretamente:** a chamada com um guardião válido cria a `simulation` **e** o job na mesma transação (ou falha inteira — testar que uma falha não deixa registro órfão). Uma chamada de guardião inválido é barrada.
