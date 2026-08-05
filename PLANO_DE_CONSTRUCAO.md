@@ -431,7 +431,7 @@ npx supabase functions new start-simulation
 
 ---
 
-### - [ ] T2.5 — Deploy e teste das functions
+### - [x] T2.5 — Deploy e teste das functions
 **O que será feito:** publicar as functions via CLI e testar cada uma com token de guardião válido e inválido, confirmando que a autorização barra o inválido.
 
 **Comandos:**
