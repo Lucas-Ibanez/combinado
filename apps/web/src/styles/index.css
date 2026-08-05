@@ -1,8 +1,39 @@
 @import "tailwindcss";
 
 @theme {
+  /* ── Modo Normal (verde profundo — confiança/calma) ── */
   --color-brand: #1F4D3F;
+  --color-brand-light: #2D6B56;
+  --color-brand-dark: #163B2F;
+  --color-brand-surface: #F0F7F4;
+  --color-brand-foreground: #FFFFFF;
+
+  /* ── Modo Atenção (âmbar — alerta moderado) ── */
   --color-attention: #B45309;
+  --color-attention-light: #D97706;
+  --color-attention-dark: #92400E;
+  --color-attention-surface: #FFFBEB;
+  --color-attention-foreground: #FFFFFF;
+
+  /* ── Modo Incidente (vermelho — SÓ crise real, nunca uso normal) ── */
   --color-danger: #B0503F;
+  --color-danger-light: #DC6B5A;
+  --color-danger-dark: #8C3A2D;
+  --color-danger-surface: #FEF2F0;
+  --color-danger-foreground: #FFFFFF;
+
+  /* ── Neutros ── */
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #F5F5F5;
+  --color-border: #E5E5E5;
+  --color-text: #171717;
+  --color-text-muted: #737373;
+  --color-text-inverted: #FFFFFF;
+
+  /* ── Sucesso (feedback positivo) ── */
+  --color-success: #16A34A;
+  --color-success-surface: #F0FDF4;
+
+  /* ── Tipografia ── */
   --font-sans: "Inter", system-ui, sans-serif;
 }

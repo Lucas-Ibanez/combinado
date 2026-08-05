@@ -463,7 +463,7 @@ npx supabase functions deploy pair-device
 
 ---
 
-### - [ ] T3.2 — Definir os design tokens dos dois modos emocionais
+### - [x] T3.2 — Definir os design tokens dos dois modos emocionais
 **O que será feito:** no CSS base do Tailwind v4, dentro do bloco `@theme { ... }`, centralizar a paleta: **verde profundo** (modo normal), **âmbar** (atenção), **vermelho reservado** só para crise (modo incidente). Tipografia legível e grande (ex.: Inter).
 
 **Exemplo (CSS, Tailwind v4):**
