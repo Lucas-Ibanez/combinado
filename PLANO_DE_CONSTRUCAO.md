@@ -158,7 +158,7 @@ npx supabase link --project-ref <REF>   # REF salvo em T0.2
 
 ---
 
-### - [ ] T0.6 — Inicializar `packages/shared` e instalar suas deps
+### - [x] T0.6 — Inicializar `packages/shared` e instalar suas deps
 **O que será feito:** criar o pacote compartilhado (tipos + contratos) que web e service vão importar. Sem dependências de runtime — só TypeScript.
 
 **Comandos:**
