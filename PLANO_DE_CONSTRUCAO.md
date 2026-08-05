@@ -69,7 +69,7 @@ Todos respondem sem erro e o Node está na faixa exigida.
 
 ---
 
-### - [ ] T0.2 — Criar contas e guardar segredos
+### - [x] T0.2 — Criar contas e guardar segredos
 **O que será feito:** criar o projeto no **Supabase** (região São Paulo, senha forte) e abrir as contas dos provedores que só serão configurados na F9, para não travar depois: **Meta/WhatsApp Business** (Cloud API), **Twilio** (conta + número), e gerar um par de chaves **VAPID** para Web Push. Guardar tudo num gerenciador de segredos.
 
 **Como garantir que foi feito corretamente:**
