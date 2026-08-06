@@ -555,7 +555,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T4.1 — `shared/config` — variáveis validadas
+### - [x] T4.1 — `shared/config` — variáveis validadas
 **O que será feito:** carregar e **validar** (com Zod) as variáveis de ambiente na inicialização — falhar cedo e com mensagem clara se faltar algo. Centralizar aqui as credenciais do Supabase, das filas e (depois) dos canais.
 
 **Como garantir que foi feito corretamente:** o serviço **recusa subir** se uma variável obrigatória estiver ausente, apontando qual falta.
