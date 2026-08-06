@@ -582,7 +582,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T4.4 — `shared/logging` — logger sem PII
+### - [x] T4.4 — `shared/logging` — logger sem PII
 **O que será feito:** logger estruturado que **nunca** registra texto de mensagem, telefone completo ou conteúdo bruto — só IDs, tipos de evento e metadados.
 
 **Como garantir que foi feito corretamente:** inspecionar os logs de um fluxo de teste e confirmar que **nenhum** dado pessoal sensível aparece.
