@@ -591,7 +591,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T4.5 — `index.ts` — bootstrap dos papéis
+### - [x] T4.5 — `index.ts` — bootstrap dos papéis
 **O que será feito:** orquestrar a subida dos três módulos (e, depois, do servidor HTTP da F9) no mesmo processo — separação **lógica**. Deixar claro no código onde cada papel começa, para a separação física futura ser um recorte limpo.
 
 **Como garantir que foi feito corretamente:** subir o serviço inicializa os três papéis (ainda sem lógica) e fica escutando, conectado ao Supabase e lendo (vazio) de uma fila PGMQ.
