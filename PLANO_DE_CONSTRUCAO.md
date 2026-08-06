@@ -540,7 +540,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T3.9 — Finalizar o PWA (manifest + service worker base)
+### - [x] T3.9 — Finalizar o PWA (manifest + service worker base)
 **O que será feito:** completar a configuração do `vite-plugin-pwa` (instalado em T0.7): manifest (nome, ícones, tema) e service worker base. O push entra na F9/F12; aqui é só deixar instalável.
 
 **Como garantir que foi feito corretamente:** o navegador oferece "instalar" o app (ícone de instalação aparece na barra de endereço em navegadores compatíveis).
