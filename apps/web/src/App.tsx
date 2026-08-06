@@ -4,7 +4,8 @@ import ProtectedRoute from '@/components/common/ProtectedRoute'
 import AppLayout from '@/components/common/AppLayout'
 import DashboardPage from '@/pages/DashboardPage'
 import IncidentsPage from '@/pages/IncidentsPage'
-import SimulationsPage from '@/pages/SimulationsPage'
+import ProtectionPage from '@/pages/ProtectionPage'
+import ChatPage from '@/pages/ChatPage'
 import SettingsPage from '@/pages/SettingsPage'
 import LoginPage from '@/pages/LoginPage'
 import MfaEnrollPage from '@/pages/MfaEnrollPage'
@@ -30,8 +31,9 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
               <Route index element={<DashboardPage />} />
-              <Route path="incidents" element={<IncidentsPage />} />
-              <Route path="simulations" element={<SimulationsPage />} />
+              <Route path="alerts" element={<IncidentsPage />} />
+              <Route path="protection" element={<ProtectionPage />} />
+              <Route path="chat" element={<ChatPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>
           </Route>

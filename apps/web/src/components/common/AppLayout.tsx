@@ -1,10 +1,10 @@
 import { NavLink, Outlet } from 'react-router-dom'
 
 const navItems = [
-  { to: '/', label: 'Painel' },
-  { to: '/incidents', label: 'Incidentes' },
-  { to: '/simulations', label: 'Simulações' },
-  { to: '/settings', label: 'Config' },
+  { to: '/', label: 'Início' },
+  { to: '/alerts', label: 'Alertas' },
+  { to: '/protection', label: 'Proteção' },
+  { to: '/chat', label: 'Chat' },
 ]
 
 export default function AppLayout() {

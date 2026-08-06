@@ -531,7 +531,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T3.8 — Shell de navegação com as quatro áreas
+### - [x] T3.8 — Shell de navegação com as quatro áreas
 **O que será feito:** navegação inferior mobile-first com quatro abas — **Início · Alertas · Proteção · Chat** — cada uma abrindo uma tela placeholder plausível. Uma ação primária por tela (regra do modo normal).
 
 **Como garantir que foi feito corretamente:** as quatro abas navegam e cada uma mostra seu placeholder.
