@@ -524,7 +524,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T3.7 — Guard de rotas protegidas
+### - [x] T3.7 — Guard de rotas protegidas
 **O que será feito:** proteger as rotas internas atrás de sessão autenticada; redirecionar quem não está logado para o login.
 
 **Como garantir que foi feito corretamente:** acessar uma rota interna sem sessão redireciona para o login; com sessão, entra normalmente.
