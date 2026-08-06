@@ -564,7 +564,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T4.2 — `shared/db` — cliente Supabase (service role)
+### - [x] T4.2 — `shared/db` — cliente Supabase (service role)
 **O que será feito:** instanciar o cliente com a `service_role`, **isolado neste módulo**, importando os tipos de `@combinado/shared`. Nenhum outro módulo cria cliente próprio — todos passam por aqui.
 
 **Como garantir que foi feito corretamente:** o serviço faz um `select` simples numa tabela e recebe resposta.
