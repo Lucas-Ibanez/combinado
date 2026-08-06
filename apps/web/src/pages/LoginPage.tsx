@@ -30,7 +30,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [signupSuccess, setSignupSuccess] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -47,7 +46,6 @@ export default function LoginPage() {
           setError(friendlyError(signUpError.message))
           return
         }
-        setSignupSuccess(true)
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
@@ -57,36 +55,13 @@ export default function LoginPage() {
           setError(friendlyError(signInError.message))
           return
         }
-        await queryClient.invalidateQueries({ queryKey: ['session'] })
-        navigate('/', { replace: true })
       }
+      queryClient.removeQueries({ queryKey: ['session'] })
+      queryClient.removeQueries({ queryKey: ['auth-state'] })
+      navigate('/', { replace: true })
     } finally {
       setLoading(false)
     }
-  }
-
-  if (signupSuccess) {
-    return (
-      <div className="min-h-screen bg-brand flex flex-col items-center justify-center p-8">
-        <div className="bg-surface rounded-2xl shadow-lg p-8 w-full max-w-sm text-center">
-          <h1 className="text-2xl font-bold text-brand mb-2">Conta criada</h1>
-          <p className="text-text-muted text-sm mb-6">
-            Enviamos um e-mail de confirmação para <strong className="text-text">{email}</strong>. Abra-o e clique no link para ativar sua conta.
-          </p>
-          <button
-            type="button"
-            onClick={() => {
-              setSignupSuccess(false)
-              setMode('login')
-              setPassword('')
-            }}
-            className="text-sm text-brand font-medium hover:underline"
-          >
-            Voltar para o login
-          </button>
-        </div>
-      </div>
-    )
   }
 
   return (

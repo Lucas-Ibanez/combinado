@@ -515,7 +515,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T3.6 — Fluxo de MFA (TOTP)
+### - [x] T3.6 — Fluxo de MFA (TOTP)
 **O que será feito:** fluxo de ativação do segundo fator no primeiro acesso (mostrar o QR do authenticator, validar o código) e exigência do TOTP nos logins seguintes.
 
 **Como garantir que foi feito corretamente:** um novo usuário ativa o MFA e, no login seguinte, precisa do código do authenticator para entrar.
