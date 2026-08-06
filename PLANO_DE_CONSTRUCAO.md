@@ -573,7 +573,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T4.3 — `shared/queue` — a interface de fila (impl. PGMQ)
+### - [x] T4.3 — `shared/queue` — a interface de fila (impl. PGMQ)
 **O que será feito:** definir a **interface** (`enqueue`, `consume`, `ack`, `deadletter`) e implementá-la sobre o PGMQ. Consumidores idempotentes por contrato.
 
 **Como garantir que foi feito corretamente:** um teste enfileira e consome uma mensagem via a interface (não chamando o PGMQ diretamente).

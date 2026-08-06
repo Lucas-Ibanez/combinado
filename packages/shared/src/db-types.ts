@@ -521,7 +521,64 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      acknowledge_incident_tx: {
+        Args: {
+          p_family_id: string
+          p_guardian_id: string
+          p_incident_id: string
+        }
+        Returns: string
+      }
       current_user_family_id: { Args: never; Returns: string }
+      pair_device_tx: {
+        Args: {
+          p_family_id: string
+          p_guardian_id: string
+          p_idempotency_key?: string
+          p_protected_person_id: string
+        }
+        Returns: string
+      }
+      queue_deadletter: {
+        Args: {
+          dlq_name: string
+          message: Json
+          msg_id: number
+          queue_name: string
+        }
+        Returns: undefined
+      }
+      queue_delete: {
+        Args: { msg_id: number; queue_name: string }
+        Returns: boolean
+      }
+      queue_read: {
+        Args: {
+          batch_size: number
+          queue_name: string
+          visibility_seconds: number
+        }
+        Returns: {
+          enqueued_at: string
+          message: Json
+          msg_id: number
+          read_ct: number
+          vt: string
+        }[]
+      }
+      queue_send: {
+        Args: { message: Json; queue_name: string }
+        Returns: number
+      }
+      start_simulation_tx: {
+        Args: {
+          p_family_id: string
+          p_guardian_id: string
+          p_idempotency_key?: string
+          p_protected_person_id: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
