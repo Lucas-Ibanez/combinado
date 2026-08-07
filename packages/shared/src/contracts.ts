@@ -88,6 +88,43 @@ export interface RiskQueueMessage {
 }
 
 // ---------------------------------------------------------------------------
+// Evento mínimo — o que o gateway publica em risk_queue depois de normalizar
+// uma mensagem recebida. Contém SINAIS (flags e metadados), NUNCA o conteúdo
+// bruto. É a materialização da privacidade em T5.4/F11: quem processar isso
+// pra frente (Risk Worker, LLM, logs) não tem acesso ao texto da conversa.
+// ---------------------------------------------------------------------------
+export type MinimalEventMessageType =
+  | 'text'
+  | 'audio'
+  | 'image'
+  | 'video'
+  | 'document'
+  | 'sticker'
+  | 'other'
+
+export interface MinimalEvent {
+  // Idempotência: msg id do WhatsApp — o mesmo evento nunca vira dois na fila
+  event_id: string
+  family_id: string
+  protected_person_id: string
+  // JID do terceiro (não do protegido). O risk worker precisa desse valor
+  // para casar contra a lista de contatos e olhar histórico.
+  sender_jid: string
+  // Tipo do payload — decide qual pipeline o risk aplica.
+  message_type: MinimalEventMessageType
+  // Sinal de tamanho — útil para heurísticas (ex.: "mensagem muito longa
+  // e cheia de urgência"), NÃO o texto.
+  text_length: number | null
+  signals: RiskSignals
+  // Momento em que o gateway recebeu o evento (ISO). Diferente do
+  // messageTimestamp do WhatsApp — este é o "observado por nós".
+  captured_at: string
+  // messageTimestamp do WhatsApp (segundos) — para reconstituir ordem
+  // relativa e detectar burst.
+  wa_timestamp: number | null
+}
+
+// ---------------------------------------------------------------------------
 // Entrega — passos da escada publicados na delivery_queue
 // ---------------------------------------------------------------------------
 export interface DeliveryStep {

@@ -8,12 +8,18 @@ import {
   type BaileysHandle,
   type InboundMessage,
 } from '../baileys/index.js'
+import { normalize } from '../normalize/index.js'
+
+interface Session {
+  handle: BaileysHandle
+  familyId: string
+}
 
 // PairingManager: uma instância Baileys por protected_person em memória.
 // Roteia callbacks para o banco (baileys_status / baileys_pairing_qr) e
 // mantém as sessões vivas durante o processo.
 export class PairingManager {
-  private sessions = new Map<string, BaileysHandle>()
+  private sessions = new Map<string, Session>()
 
   constructor(private log: Logger) {}
 
@@ -26,6 +32,21 @@ export class PairingManager {
       })
       return
     }
+
+    // Cacheia o family_id agora (o normalizer precisa dele por mensagem).
+    const { data: ppRow, error: ppErr } = await db
+      .from('protected_persons')
+      .select('family_id')
+      .eq('id', protectedPersonId)
+      .single()
+    if (ppErr || !ppRow) {
+      this.log.error('protegido não encontrado — abortando open', {
+        protected_person_id: protectedPersonId,
+        error_name: ppErr?.name ?? 'not_found',
+      })
+      return
+    }
+    const familyId = ppRow.family_id
 
     const personLog = this.log.child({ protected_person_id: protectedPersonId })
 
@@ -78,12 +99,12 @@ export class PairingManager {
         await fs.rm(keysDirFor(protectedPersonId), { recursive: true, force: true }).catch(() => {})
         this.sessions.delete(protectedPersonId)
       },
-      onMessage: (msg) => this.handleInboundMessage(protectedPersonId, msg, personLog),
+      onMessage: (msg) => this.handleInboundMessage({ protectedPersonId, familyId }, msg, personLog),
       },
       pairingPhoneNumber ? { pairingPhoneNumber } : {},
     )
 
-    this.sessions.set(protectedPersonId, handle)
+    this.sessions.set(protectedPersonId, { handle, familyId })
   }
 
   // Restaura no boot as sessões que já estavam pareadas — reabre o socket
@@ -110,32 +131,35 @@ export class PairingManager {
     this.log.info('restauração de sessões concluída', { count: (data ?? []).length })
   }
 
-  // Handler de mensagem inbound — só loga metadados seguros (sem conteúdo).
-  // A normalização em "evento mínimo" e publicação em risk_queue vêm em T5.4.
+  // Handler de mensagem inbound — normaliza para o evento mínimo (T5.4) e
+  // loga só metadados seguros. A publicação em risk_queue vem em T5.5.
   private handleInboundMessage(
-    protectedPersonId: string,
+    ctx: { protectedPersonId: string; familyId: string },
     msg: InboundMessage,
     log: Logger,
   ): void {
-    log.info('mensagem inbound recebida', {
-      protected_person_id: protectedPersonId,
-      wa_msg_id: msg.messageId,
-      remote_jid: msg.remoteJid,
-      timestamp: msg.timestamp,
-      payload_types: keysOf((msg.raw.message ?? {}) as Record<string, unknown>),
+    const event = normalize(msg, {
+      familyId: ctx.familyId,
+      protectedPersonId: ctx.protectedPersonId,
+    })
+    log.info('evento mínimo gerado', {
+      protected_person_id: event.protected_person_id,
+      family_id: event.family_id,
+      wa_msg_id: event.event_id,
+      remote_jid: event.sender_jid,
+      wa_type: event.message_type,
+      text_length: event.text_length,
+      signals: event.signals,
+      wa_timestamp: event.wa_timestamp,
     })
   }
 
   async stopAll(): Promise<void> {
     const ids = Array.from(this.sessions.keys())
     for (const id of ids) {
-      const handle = this.sessions.get(id)
-      if (handle) await handle.stop()
+      const session = this.sessions.get(id)
+      if (session) await session.handle.stop()
     }
     this.sessions.clear()
   }
-}
-
-function keysOf(o: Record<string, unknown>): string[] {
-  return Object.keys(o).filter((k) => o[k] != null)
 }

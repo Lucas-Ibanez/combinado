@@ -10,7 +10,8 @@
     "test:logging": "tsx tests/logging.smoke.ts",
     "test:pair": "tsx tests/pair-device.smoke.ts",
     "test:msg-upsert": "tsx tests/messages-upsert.smoke.ts",
-    "test:msg-upsert-live": "tsx tests/messages-upsert.live.ts"
+    "test:msg-upsert-live": "tsx tests/messages-upsert.live.ts",
+    "test:normalize": "tsx tests/normalize.smoke.ts"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
