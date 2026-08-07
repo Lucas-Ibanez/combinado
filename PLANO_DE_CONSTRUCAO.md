@@ -616,7 +616,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T5.2 — Pareamento acionado por job
+### - [x] T5.2 — Pareamento acionado por job
 **O que será feito:** consumir o job de `pair-device` (F2): gerar o QR ou o código de pareamento e gravar no estado do protegido (o app lê e exibe). Tratar o ciclo "aguardando pareamento → pareado".
 
 **Como garantir que foi feito corretamente:** pedir o pareamento pelo fluxo (via Command API) gera um QR que, ao ser escaneado, vincula o número — e o estado do protegido muda para "pareado".

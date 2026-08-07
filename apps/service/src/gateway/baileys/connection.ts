@@ -5,7 +5,6 @@ import {
   fetchLatestBaileysVersion,
   type WASocket,
 } from '@whiskeysockets/baileys'
-import qrcode from 'qrcode-terminal'
 import type { Logger } from '../../shared/logging/index.js'
 import { loadAuthState } from './authState.js'
 
@@ -13,35 +12,42 @@ export interface BaileysHandle {
   stop(): Promise<void>
 }
 
+export interface BaileysCallbacks {
+  onQr?: (qr: string) => void | Promise<void>
+  onOpen?: (jid: string | null) => void | Promise<void>
+  onLoggedOut?: () => void | Promise<void>
+}
+
 // Backoff simples para reconexão. Se cair, tenta de novo com espera crescente
 // até um teto — sem virar loop apertado que abusa da rede.
 const RECONNECT_DELAYS_MS = [1_000, 3_000, 5_000, 10_000, 30_000]
 
 // Silencia o pino interno do Baileys — nosso logger é a fonte de verdade.
-// Interface mínima que o Baileys usa (compatível com pino).
 const silentLogger: any = (() => {
   const noop = () => {}
   const l: any = {
-    trace: noop,
-    debug: noop,
-    info: noop,
-    warn: noop,
-    error: noop,
-    fatal: noop,
+    trace: noop, debug: noop, info: noop,
+    warn: noop, error: noop, fatal: noop,
     level: 'silent',
   }
   l.child = () => l
   return l
 })()
 
-export async function startBaileysConnection(log: Logger): Promise<BaileysHandle> {
+// Inicia uma conexão Baileys para UM protected_person. Cada conexão vive
+// isolada em seu próprio keys dir, e as transições relevantes viram callbacks.
+export async function startBaileysConnection(
+  protectedPersonId: string,
+  log: Logger,
+  callbacks: BaileysCallbacks = {},
+): Promise<BaileysHandle> {
   let stopped = false
   let sock: WASocket | null = null
   let reconnectAttempt = 0
   let currentTimer: NodeJS.Timeout | null = null
 
   async function connect(): Promise<void> {
-    const { state, saveCreds } = await loadAuthState()
+    const { state, saveCreds } = await loadAuthState(protectedPersonId)
     const { version, isLatest } = await fetchLatestBaileysVersion()
     const hasCreds = !!state.creds?.me
     log.info('conectando ao WhatsApp', {
@@ -58,7 +64,6 @@ export async function startBaileysConnection(log: Logger): Promise<BaileysHandle
       // strings customizadas em 2025. Ubuntu+Chrome é o combo menos filtrado.
       browser: Browsers.ubuntu('Chrome'),
       logger: silentLogger,
-      // printQRInTerminal foi descontinuado — cuidamos do QR abaixo.
     })
 
     sock.ev.on('creds.update', saveCreds)
@@ -66,11 +71,10 @@ export async function startBaileysConnection(log: Logger): Promise<BaileysHandle
     sock.ev.on('connection.update', (update) => {
       const { connection, lastDisconnect, qr } = update
 
-      if (qr) {
-        log.info('QR de pareamento gerado — escaneie no WhatsApp do celular de teste')
-        // Só em dev: imprime o QR no terminal. Em produção, isso vai para o app
-        // do guardião via um job (T5.2).
-        qrcode.generate(qr, { small: true })
+      if (qr && callbacks.onQr) {
+        void Promise.resolve(callbacks.onQr(qr)).catch((err) =>
+          log.error('callback onQr falhou', { error_name: (err as Error).name }),
+        )
       }
 
       if (connection === 'connecting') {
@@ -79,14 +83,17 @@ export async function startBaileysConnection(log: Logger): Promise<BaileysHandle
 
       if (connection === 'open') {
         reconnectAttempt = 0
-        log.info('baileys conexão OPEN', {
-          jid: sock?.user?.id ? maskJid(sock.user.id) : null,
-        })
+        const jid = sock?.user?.id ?? null
+        log.info('baileys conexão OPEN', { jid: jid ? maskJid(jid) : null })
+        if (callbacks.onOpen) {
+          void Promise.resolve(callbacks.onOpen(jid)).catch((err) =>
+            log.error('callback onOpen falhou', { error_name: (err as Error).name }),
+          )
+        }
       }
 
       if (connection === 'close') {
-        // O erro do Baileys é um Boom — não importamos o tipo para não depender
-        // de package transitivo; lemos statusCode com duck typing.
+        // Duck typing sobre o erro Boom para não depender de package transitivo.
         const err = (lastDisconnect?.error as { output?: { statusCode?: number } } | undefined)
           ?.output?.statusCode
         const loggedOut = err === DisconnectReason.loggedOut
@@ -95,9 +102,16 @@ export async function startBaileysConnection(log: Logger): Promise<BaileysHandle
           disconnect_code: err ?? null,
         })
 
-        if (stopped || loggedOut) {
-          if (loggedOut) {
-            log.warn('sessão deslogada — remova apps/service/keys e refaça o pareamento')
+        if (stopped) return
+
+        if (loggedOut) {
+          log.warn('sessão deslogada — apague o keys dir do protegido para reparear')
+          if (callbacks.onLoggedOut) {
+            void Promise.resolve(callbacks.onLoggedOut()).catch((cbErr) =>
+              log.error('callback onLoggedOut falhou', {
+                error_name: (cbErr as Error).name,
+              }),
+            )
           }
           return
         }
@@ -136,8 +150,6 @@ export async function startBaileysConnection(log: Logger): Promise<BaileysHandle
   }
 }
 
-// Trunca o JID (ex.: "5511987654321@s.whatsapp.net") mantendo só os últimos
-// 4 dígitos + o domínio. Nunca logamos o número completo.
 function maskJid(jid: string): string {
   const [user, domain] = jid.split('@')
   if (!user) return '[REDACTED]'
