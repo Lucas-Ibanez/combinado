@@ -14,6 +14,7 @@ import type { MinimalEvent } from '@combinado/shared'
 import type { Logger } from '../shared/logging/index.js'
 import { queue } from '../shared/queue/index.js'
 import type { QueueMessage } from '../shared/queue/types.js'
+import { evaluateRules } from './rules/index.js'
 
 export interface RiskHandle {
   stop(): Promise<void>
@@ -107,16 +108,42 @@ export async function startRisk(log: Logger): Promise<RiskHandle> {
   }
 }
 
-// Pipeline de risco — T6.2→T6.5 vão preencher as camadas aqui.
-// Por ora, loga os sinais e retorna (prove que o consumo funciona end-to-end).
+// Pipeline de risco — camadas sequenciais.
+// Camada 1 (regras) pode short-circuit: se o caso é óbvio, não precisa do
+// classificador nem do LLM. Camadas 2-4 entram em T6.3→T6.5.
 async function processEvent(event: MinimalEvent, log: Logger): Promise<void> {
-  log.info('pipeline de risco executando', {
+  const t0 = performance.now()
+
+  // Camada 1: regras determinísticas
+  const ruleResult = evaluateRules(event)
+  const elapsed = Math.round(performance.now() - t0)
+
+  log.info('regras avaliadas', {
     event_id: event.event_id,
     wa_type: event.message_type,
     signals: event.signals,
-    char_count: event.text_length,
-    wa_timestamp: event.wa_timestamp,
+    decision: ruleResult.decision,
+    severity: ruleResult.severity,
+    triggered_rules: ruleResult.triggered_rules,
+    short_circuit: ruleResult.short_circuit,
+    elapsed_ms: elapsed,
   })
+
+  if (ruleResult.short_circuit) {
+    // Caso óbvio — a regra já decidiu. O LLM pode enriquecer a explicação
+    // depois, mas a ação sai agora.
+    log.info('short-circuit: regras decidiram sem LLM', {
+      event_id: event.event_id,
+      decision: ruleResult.decision,
+      severity: ruleResult.severity,
+    })
+    // T6.5 (política) e T7 (orchestrator) consomem o resultado daqui.
+    return
+  }
+
+  // T6.3: classificador estreito (score heurístico)
+  // T6.4: LLM como apoio (só ambíguos)
+  // T6.5: política determinística final
 }
 
 function sleep(ms: number): Promise<void> {

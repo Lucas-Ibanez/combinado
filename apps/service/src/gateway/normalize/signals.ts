@@ -44,6 +44,26 @@ const FAMILY_ROLE_PATTERNS = [
   /\bprim[oa]\b/i,
 ]
 
+// Pedido de sigilo — golpista tenta isolar a vítima do círculo de confiança.
+const SECRECY_PATTERNS = [
+  /\bn[ãa]o\s+(?:ligue?|fal[ae]|cont[ae]|avis[ae])/i,
+  /\bn[ãa]o\s+cont[ae]\s+(?:pra|para|a)\s+ningu[eé]m/i,
+  /\bsegredo\b/i,
+  /\bentre\s+n[oó]s\b/i,
+  /\bsó\s+eu\s+e\s+voc[eê]\b/i,
+]
+
+// Desculpa de troca de aparelho/número — pretexto pra justificar número novo.
+const DEVICE_EXCUSE_PATTERNS = [
+  /\baparelh(?:o|inho)\s+(?:quebr|estrago|roub)/i,
+  /\btroquei\s+(?:de\s+)?n[uú]mero/i,
+  /\bcelular\s+(?:quebr|estrago|roub|novo)/i,
+  /\bn[uú]mero\s+novo\b/i,
+  /\bchip\s+novo\b/i,
+  /\bperdi\s+(?:o\s+)?celular\b/i,
+  /\btelefone\s+(?:quebr|estrago|roub|novo)/i,
+]
+
 // Domínios "encurtadores" e outros padrões suspeitos em URL.
 // Não bloqueia por ter link — só sinaliza os encurtadores clássicos.
 const SUSPICIOUS_LINK_PATTERNS = [
@@ -82,6 +102,8 @@ export function computeSignals(input: ComputeSignalsInput): RiskSignals {
     if (anyMatch(URGENCY_PATTERNS, t)) signals.urgency_language = true
     if (anyMatch(FAMILY_ROLE_PATTERNS, t)) signals.impersonation_pattern = true
     if (anyMatch(SUSPICIOUS_LINK_PATTERNS, t)) signals.link_suspicious = true
+    if (anyMatch(SECRECY_PATTERNS, t)) signals.secrecy_demand = true
+    if (anyMatch(DEVICE_EXCUSE_PATTERNS, t)) signals.device_excuse = true
   }
 
   if (input.messageType === 'audio') {

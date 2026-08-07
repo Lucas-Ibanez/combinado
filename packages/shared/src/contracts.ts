@@ -76,7 +76,22 @@ export interface RiskSignals {
   voice_note?: boolean
   link_suspicious?: boolean
   impersonation_pattern?: boolean
+  forwarded?: boolean
+  secrecy_demand?: boolean
+  device_excuse?: boolean
   [key: string]: boolean | undefined
+}
+
+// ---------------------------------------------------------------------------
+// Pipeline de risco — resultado de cada camada (T6.2→T6.5)
+// ---------------------------------------------------------------------------
+export type RiskDecision = 'allow' | 'review' | 'block'
+
+export interface RuleResult {
+  decision: RiskDecision
+  severity: Severity
+  triggered_rules: string[]
+  short_circuit: boolean
 }
 
 export interface RiskQueueMessage {

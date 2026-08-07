@@ -675,7 +675,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T6.2 — Camada 1: regras determinísticas
+### - [x] T6.2 — Camada 1: regras determinísticas
 **O que será feito:** em `risk/rules`, implementar os gatilhos baratos e explicáveis: número novo, palavras de urgência, menção a Pix/chave, "aparelho quebrado", "não ligue/não conte a ninguém", pedido de valor. Para o alto risco **óbvio**, a regra já decide "pare e confirme por outro canal" — o LLM **não** entra no caminho crítico.
 
 **Como garantir que foi feito corretamente:** mensagens com o padrão clássico de golpe são marcadas de alto risco **só** pelas regras, em milissegundos.
