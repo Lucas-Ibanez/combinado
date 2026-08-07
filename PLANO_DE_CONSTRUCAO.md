@@ -633,7 +633,6 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 **Notas úteis:** ignore `key.fromMe` e mensagens de status/broadcast. O foco são mensagens de **entrada** para o protegido — é onde o golpe chega.
 
 ---
-
 ### - [ ] T5.4 — Normalizar para o "evento mínimo"
 **O que será feito:** em `gateway/normalize`, extrair só o necessário para avaliação de risco: remetente é contato conhecido? número novo? há valor/menção a Pix? tipo (texto/áudio)? — **sem carregar a conversa inteira**. Para áudio, guardar uma referência para transcrição posterior, não o binário na fila.
 
