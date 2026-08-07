@@ -666,7 +666,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T6.1 — Consumir a `risk_queue`
+### - [x] T6.1 — Consumir a `risk_queue`
 **O que será feito:** loop de consumo idempotente sobre a fila de risco. Este worker **não** mantém sessão do WhatsApp nem toca nas chaves — escala independente do Gateway.
 
 **Como garantir que foi feito corretamente:** eventos enfileirados são consumidos e logados (sem PII).
