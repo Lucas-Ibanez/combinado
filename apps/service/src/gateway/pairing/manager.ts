@@ -9,6 +9,7 @@ import {
   type InboundMessage,
 } from '../baileys/index.js'
 import { normalize } from '../normalize/index.js'
+import { queue } from '../../shared/queue/index.js'
 
 interface Session {
   handle: BaileysHandle
@@ -132,26 +133,40 @@ export class PairingManager {
   }
 
   // Handler de mensagem inbound — normaliza para o evento mínimo (T5.4) e
-  // loga só metadados seguros. A publicação em risk_queue vem em T5.5.
-  private handleInboundMessage(
+  // publica em risk_queue (T5.5). Fire-and-forget do ponto de vista do
+  // Baileys: o Gateway captura e publica; a análise roda desacoplada.
+  private async handleInboundMessage(
     ctx: { protectedPersonId: string; familyId: string },
     msg: InboundMessage,
     log: Logger,
-  ): void {
+  ): Promise<void> {
     const event = normalize(msg, {
       familyId: ctx.familyId,
       protectedPersonId: ctx.protectedPersonId,
     })
-    log.info('evento mínimo gerado', {
-      protected_person_id: event.protected_person_id,
-      family_id: event.family_id,
-      wa_msg_id: event.event_id,
-      remote_jid: event.sender_jid,
-      wa_type: event.message_type,
-      text_length: event.text_length,
-      signals: event.signals,
-      wa_timestamp: event.wa_timestamp,
-    })
+    try {
+      const queueMsgId = await queue.enqueue('risk_queue', event)
+      log.info('evento publicado em risk_queue', {
+        protected_person_id: event.protected_person_id,
+        family_id: event.family_id,
+        wa_msg_id: event.event_id,
+        remote_jid: event.sender_jid,
+        wa_type: event.message_type,
+        text_length: event.text_length,
+        signals: event.signals,
+        wa_timestamp: event.wa_timestamp,
+        queue_msg_id: queueMsgId,
+      })
+    } catch (err) {
+      // Falhar em publicar não pode derrubar o Gateway. Loga e segue —
+      // a mensagem original ainda existe no WhatsApp; se for reprocessada
+      // depois, event_id (wa msg id) garante idempotência downstream.
+      log.error('falha ao publicar em risk_queue', {
+        protected_person_id: event.protected_person_id,
+        wa_msg_id: event.event_id,
+        error_name: (err as Error).name,
+      })
+    }
   }
 
   async stopAll(): Promise<void> {

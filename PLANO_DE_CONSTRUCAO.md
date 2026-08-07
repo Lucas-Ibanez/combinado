@@ -642,7 +642,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T5.5 — Publicar o evento mínimo em `risk_queue`
+### - [x] T5.5 — Publicar o evento mínimo em `risk_queue`
 **O que será feito:** enfileirar o evento normalizado via a interface de fila (T4.3). Este é o ponto de entrega do Gateway — ele **não espera análise**, só publica e volta ao loop.
 
 **Como garantir que foi feito corretamente:** enviar uma mensagem de teste coloca um evento na `risk_queue`.
