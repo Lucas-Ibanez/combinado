@@ -625,7 +625,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T5.3 — Escutar `messages.upsert`
+### - [x] T5.3 — Escutar `messages.upsert`
 **O que será feito:** registrar o listener de mensagens recebidas. Filtrar ruído (status, mensagens próprias) e focar no que interessa: mensagens de terceiros para o protegido.
 
 **Como garantir que foi feito corretamente:** cada mensagem recebida no número de teste dispara o handler.

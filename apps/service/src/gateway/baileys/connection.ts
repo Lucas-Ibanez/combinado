@@ -3,6 +3,7 @@ import {
   Browsers,
   DisconnectReason,
   fetchLatestBaileysVersion,
+  type WAMessage,
   type WASocket,
 } from '@whiskeysockets/baileys'
 import type { Logger } from '../../shared/logging/index.js'
@@ -12,10 +13,31 @@ export interface BaileysHandle {
   stop(): Promise<void>
 }
 
+// Mensagem de entrada já filtrada — sem status, sem broadcast, não é do próprio
+// protegido. Só o que interessa pro motor de risco.
+export interface InboundMessage {
+  raw: WAMessage
+  remoteJid: string
+  messageId: string
+  timestamp: number | null
+}
+
 export interface BaileysCallbacks {
   onQr?: (qr: string) => void | Promise<void>
   onOpen?: (jid: string | null) => void | Promise<void>
   onLoggedOut?: () => void | Promise<void>
+  onMessage?: (msg: InboundMessage) => void | Promise<void>
+  // Se o telefone estiver bloqueando o QR ("não é possível conectar novos
+  // dispositivos"), passe o número em E.164 sem + (ex.: '5511987654321') e
+  // o Baileys usará o fluxo de código de pareamento em vez de QR. O código
+  // chega aqui e você digita em "Vincular com número" no WhatsApp.
+  onPairingCode?: (code: string) => void | Promise<void>
+}
+
+export interface BaileysConnectionOptions {
+  // Se definido, tenta pareamento por código em vez de QR (quando não há
+  // creds salvas). Formato: E.164 sem '+', só dígitos.
+  pairingPhoneNumber?: string
 }
 
 // Backoff simples para reconexão. Se cair, tenta de novo com espera crescente
@@ -40,6 +62,7 @@ export async function startBaileysConnection(
   protectedPersonId: string,
   log: Logger,
   callbacks: BaileysCallbacks = {},
+  options: BaileysConnectionOptions = {},
 ): Promise<BaileysHandle> {
   let stopped = false
   let sock: WASocket | null = null
@@ -67,6 +90,37 @@ export async function startBaileysConnection(
     })
 
     sock.ev.on('creds.update', saveCreds)
+
+    // Pareamento por código de 8 dígitos — alternativa ao QR quando o
+    // WhatsApp está bloqueando "novos dispositivos" (2025/2026).
+    if (!hasCreds && options.pairingPhoneNumber && !sock.authState.creds.registered) {
+      // Baileys quer um instante pra registrar o socket antes de aceitar o request
+      setTimeout(async () => {
+        try {
+          const code = await sock!.requestPairingCode(options.pairingPhoneNumber!)
+          log.info('código de pareamento gerado', { code_length: code.length })
+          if (callbacks.onPairingCode) {
+            void Promise.resolve(callbacks.onPairingCode(code)).catch((err) =>
+              log.error('callback onPairingCode falhou', {
+                error_name: (err as Error).name,
+              }),
+            )
+          }
+        } catch (err) {
+          log.error('falha ao pedir pairing code', {
+            error_name: (err as Error).name,
+          })
+        }
+      }, 3_000)
+    }
+
+    sock.ev.on('messages.upsert', (payload) => {
+      dispatchInbound(payload, callbacks.onMessage, (err) =>
+        log.error('callback onMessage falhou', {
+          error_name: err.name,
+        }),
+      )
+    })
 
     sock.ev.on('connection.update', (update) => {
       const { connection, lastDisconnect, qr } = update
@@ -147,6 +201,74 @@ export async function startBaileysConnection(
         // já fechado — sem problema
       }
     },
+  }
+}
+
+// Filtra mensagens que interessam ao motor de risco.
+// Descarta: mensagens do próprio protegido (fromMe), status/broadcast, e
+// mensagens de protocolo/vazias que o WhatsApp entrega mas não têm conteúdo
+// endereçado ao protegido (revoke, receipts internos, senderKey distribution).
+// Exportada para testes — a lógica não deve depender do socket.
+export function filterInbound(raw: WAMessage): InboundMessage | null {
+  const key = raw.key
+  if (!key || !key.remoteJid || !key.id) return null
+  if (key.fromMe) return null
+
+  const jid = key.remoteJid
+  if (jid === 'status@broadcast') return null
+  if (jid.endsWith('@broadcast')) return null
+
+  // Mensagens sem payload real (só protocolo) — nada pra classificar.
+  const m = raw.message
+  if (!m) return null
+  const keysInPayload = Object.keys(m).filter((k) => (m as Record<string, unknown>)[k] != null)
+  const protocolOnlyKey = keysInPayload.length === 1 && (
+    keysInPayload[0] === 'protocolMessage' ||
+    keysInPayload[0] === 'senderKeyDistributionMessage' ||
+    keysInPayload[0] === 'reactionMessage' ||
+    keysInPayload[0] === 'messageContextInfo'
+  )
+  if (protocolOnlyKey) return null
+  if (keysInPayload.length === 0) return null
+
+  return {
+    raw,
+    remoteJid: jid,
+    messageId: key.id,
+    timestamp:
+      typeof raw.messageTimestamp === 'number'
+        ? raw.messageTimestamp
+        : raw.messageTimestamp?.toNumber?.() ?? null,
+  }
+}
+
+// Dispatcher do evento messages.upsert — extraído puro para ser exercitado
+// em teste sem subir o socket. Só chama onMessage para mensagens que passam
+// no filtro E somente quando o tipo do batch é 'notify' (realtime).
+export function dispatchInbound(
+  payload: { messages: WAMessage[]; type: string },
+  onMessage: ((msg: InboundMessage) => void | Promise<void>) | undefined,
+  onCallbackError?: (err: Error) => void,
+): void {
+  // 'notify' = mensagem realtime chegando; 'append' seria sync histórico.
+  // Só nos interessa realtime — o golpe chega ao vivo.
+  if (payload.type !== 'notify') return
+  for (const raw of payload.messages) {
+    const filtered = filterInbound(raw)
+    if (!filtered) continue
+    if (onMessage) {
+      // try/catch pega throw síncrono; Promise.resolve().catch pega rejeição async.
+      try {
+        const result = onMessage(filtered)
+        if (result && typeof (result as Promise<void>).then === 'function') {
+          void (result as Promise<void>).catch((err) => {
+            if (onCallbackError) onCallbackError(err as Error)
+          })
+        }
+      } catch (err) {
+        if (onCallbackError) onCallbackError(err as Error)
+      }
+    }
   }
 }
 

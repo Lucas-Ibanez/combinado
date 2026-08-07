@@ -8,7 +8,8 @@
     "start": "tsx src/index.ts",
     "test:queue": "tsx tests/queue.smoke.ts",
     "test:logging": "tsx tests/logging.smoke.ts",
-    "test:pair": "tsx tests/pair-device.smoke.ts"
+    "test:pair": "tsx tests/pair-device.smoke.ts",
+    "test:msg-upsert": "tsx tests/messages-upsert.smoke.ts"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
