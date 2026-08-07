@@ -9,8 +9,11 @@ import {
 import type { Logger } from '../../shared/logging/index.js'
 import { loadAuthState } from './authState.js'
 
+export type SessionHealth = 'connected' | 'reconnecting' | 'disconnected'
+
 export interface BaileysHandle {
   stop(): Promise<void>
+  health(): SessionHealth
 }
 
 // Mensagem de entrada já filtrada — sem status, sem broadcast, não é do próprio
@@ -27,11 +30,9 @@ export interface BaileysCallbacks {
   onOpen?: (jid: string | null) => void | Promise<void>
   onLoggedOut?: () => void | Promise<void>
   onMessage?: (msg: InboundMessage) => void | Promise<void>
-  // Se o telefone estiver bloqueando o QR ("não é possível conectar novos
-  // dispositivos"), passe o número em E.164 sem + (ex.: '5511987654321') e
-  // o Baileys usará o fluxo de código de pareamento em vez de QR. O código
-  // chega aqui e você digita em "Vincular com número" no WhatsApp.
   onPairingCode?: (code: string) => void | Promise<void>
+  onDisconnected?: () => void | Promise<void>
+  onReconnecting?: (attempt: number, delayMs: number) => void | Promise<void>
 }
 
 export interface BaileysConnectionOptions {
@@ -40,9 +41,15 @@ export interface BaileysConnectionOptions {
   pairingPhoneNumber?: string
 }
 
-// Backoff simples para reconexão. Se cair, tenta de novo com espera crescente
-// até um teto — sem virar loop apertado que abusa da rede.
-const RECONNECT_DELAYS_MS = [1_000, 3_000, 5_000, 10_000, 30_000]
+// Backoff com jitter para reconexão. A base cresce até 30s e o jitter
+// espalha tentativas de sessões diferentes para não baterem juntas na rede.
+const RECONNECT_BASE_MS = [1_000, 3_000, 5_000, 10_000, 30_000]
+
+function jitteredDelay(attempt: number): number {
+  const base = RECONNECT_BASE_MS[Math.min(attempt, RECONNECT_BASE_MS.length - 1)]!
+  const jitter = Math.floor(Math.random() * base * 0.3)
+  return base + jitter
+}
 
 // Silencia o pino interno do Baileys — nosso logger é a fonte de verdade.
 const silentLogger: any = (() => {
@@ -68,6 +75,7 @@ export async function startBaileysConnection(
   let sock: WASocket | null = null
   let reconnectAttempt = 0
   let currentTimer: NodeJS.Timeout | null = null
+  let currentHealth: SessionHealth = 'disconnected'
 
   async function connect(): Promise<void> {
     const { state, saveCreds } = await loadAuthState(protectedPersonId)
@@ -137,6 +145,7 @@ export async function startBaileysConnection(
 
       if (connection === 'open') {
         reconnectAttempt = 0
+        currentHealth = 'connected'
         const jid = sock?.user?.id ?? null
         log.info('baileys conexão OPEN', { jid: jid ? maskJid(jid) : null })
         if (callbacks.onOpen) {
@@ -156,6 +165,8 @@ export async function startBaileysConnection(
           disconnect_code: err ?? null,
         })
 
+        currentHealth = 'disconnected'
+
         if (stopped) return
 
         if (loggedOut) {
@@ -170,16 +181,35 @@ export async function startBaileysConnection(
           return
         }
 
+        // Sinaliza desconexão antes de agendar reconexão — o app atualiza o
+        // health check imediatamente enquanto o backoff roda.
+        if (callbacks.onDisconnected) {
+          void Promise.resolve(callbacks.onDisconnected()).catch((cbErr) =>
+            log.error('callback onDisconnected falhou', {
+              error_name: (cbErr as Error).name,
+            }),
+          )
+        }
+
         scheduleReconnect()
       }
     })
   }
 
   function scheduleReconnect() {
-    const idx = Math.min(reconnectAttempt, RECONNECT_DELAYS_MS.length - 1)
-    const delay = RECONNECT_DELAYS_MS[idx]!
+    const delay = jitteredDelay(reconnectAttempt)
     reconnectAttempt += 1
+    currentHealth = 'reconnecting'
     log.info('reconectando em breve', { delay_ms: delay, next_attempt: reconnectAttempt })
+
+    if (callbacks.onReconnecting) {
+      void Promise.resolve(callbacks.onReconnecting(reconnectAttempt, delay)).catch((cbErr) =>
+        log.error('callback onReconnecting falhou', {
+          error_name: (cbErr as Error).name,
+        }),
+      )
+    }
+
     currentTimer = setTimeout(() => {
       if (stopped) return
       void connect().catch((err) => {
@@ -194,12 +224,16 @@ export async function startBaileysConnection(
   return {
     async stop() {
       stopped = true
+      currentHealth = 'disconnected'
       if (currentTimer) clearTimeout(currentTimer)
       try {
         sock?.end(undefined)
       } catch {
         // já fechado — sem problema
       }
+    },
+    health(): SessionHealth {
+      return currentHealth
     },
   }
 }

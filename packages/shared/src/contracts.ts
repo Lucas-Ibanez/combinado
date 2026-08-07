@@ -29,7 +29,7 @@ export type Severity = 'low' | 'medium' | 'high' | 'critical'
 
 export type DeliveryChannel = 'push' | 'whatsapp' | 'sms' | 'call'
 
-export type BaileysStatus = 'unpaired' | 'pairing' | 'paired' | 'disconnected'
+export type BaileysStatus = 'unpaired' | 'pairing' | 'paired' | 'disconnected' | 'reconnecting'
 
 export type SimulationStatus = 'scheduled' | 'sent' | 'responded' | 'expired'
 

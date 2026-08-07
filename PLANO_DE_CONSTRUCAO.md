@@ -651,7 +651,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T5.6 — Reconexão automática e health check
+### - [x] T5.6 — Reconexão automática e health check
 **O que será feito:** tratar quedas de conexão com reconexão (com jitter) e expor um sinal de **saúde da sessão** (conectada/desconectada) que o app vai mostrar em destaque na tela de Proteção.
 
 **Como garantir que foi feito corretamente:** derrubar a rede e voltar reconecta **sem** novo QR, e o sinal de saúde reflete o estado real.

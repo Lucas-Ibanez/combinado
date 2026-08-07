@@ -7,6 +7,7 @@ import {
   keysDirFor,
   type BaileysHandle,
   type InboundMessage,
+  type SessionHealth,
 } from '../baileys/index.js'
 import { normalize } from '../normalize/index.js'
 import { queue } from '../../shared/queue/index.js'
@@ -101,6 +102,20 @@ export class PairingManager {
         this.sessions.delete(protectedPersonId)
       },
       onMessage: (msg) => this.handleInboundMessage({ protectedPersonId, familyId }, msg, personLog),
+      onDisconnected: async () => {
+        personLog.warn('sessão desconectada — atualizando health no banco')
+        await db
+          .from('protected_persons')
+          .update({ baileys_status: 'disconnected' })
+          .eq('id', protectedPersonId)
+      },
+      onReconnecting: async (attempt, delayMs) => {
+        personLog.info('tentando reconectar', { attempt, delay_ms: delayMs })
+        await db
+          .from('protected_persons')
+          .update({ baileys_status: 'reconnecting' })
+          .eq('id', protectedPersonId)
+      },
       },
       pairingPhoneNumber ? { pairingPhoneNumber } : {},
     )
@@ -167,6 +182,19 @@ export class PairingManager {
         error_name: (err as Error).name,
       })
     }
+  }
+
+  getHealth(protectedPersonId: string): SessionHealth | null {
+    const session = this.sessions.get(protectedPersonId)
+    return session ? session.handle.health() : null
+  }
+
+  getAllHealth(): Record<string, SessionHealth> {
+    const result: Record<string, SessionHealth> = {}
+    for (const [id, session] of this.sessions) {
+      result[id] = session.handle.health()
+    }
+    return result
   }
 
   async stopAll(): Promise<void> {
