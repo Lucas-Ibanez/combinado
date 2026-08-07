@@ -607,7 +607,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T5.1 — Conexão Baileys como dispositivo vinculado
+### - [x] T5.1 — Conexão Baileys como dispositivo vinculado
 **O que será feito:** implementar a conexão multi-device do Baileys em `gateway/baileys`. Em dev, persistir o `authState` localmente (pasta `keys/`, gitignored); a criptografia forte das chaves entra na F11/T11.1.
 
 **Como garantir que foi feito corretamente:** o serviço estabelece uma sessão com o WhatsApp do número de teste (a conexão fica "open").
