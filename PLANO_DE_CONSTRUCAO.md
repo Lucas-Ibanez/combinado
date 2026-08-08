@@ -757,7 +757,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T7.4 — Registrar cada delivery com telemetria
+### - [x] T7.4 — Registrar cada delivery com telemetria
 **O que será feito:** para cada tentativa, gravar em `incident_deliveries`: canal, `sent_at`, `delivered_at`, `acknowledged_at`, `acknowledged_by`, prazo de escalonamento e motivo de falha.
 
 **Como garantir que foi feito corretamente:** a linha do tempo de um incidente mostra cada tentativa (por qual canal, quando, com que desfecho).

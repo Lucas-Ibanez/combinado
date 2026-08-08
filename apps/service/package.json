@@ -22,7 +22,8 @@
     "test:risk-persist": "tsx tests/risk-persist.smoke.ts",
     "test:incident-upsert": "tsx tests/incident-upsert.smoke.ts",
     "test:cooldown": "tsx tests/cooldown.smoke.ts",
-    "test:ladder": "tsx tests/ladder.smoke.ts"
+    "test:ladder": "tsx tests/ladder.smoke.ts",
+    "test:delivery-telemetry": "tsx tests/delivery-telemetry.smoke.ts"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

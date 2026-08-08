@@ -36,4 +36,18 @@ class MockDispatcher implements ChannelDispatcher {
   }
 }
 
-export const dispatcher: ChannelDispatcher = new MockDispatcher()
+let activeDispatcher: ChannelDispatcher = new MockDispatcher()
+
+export const dispatcher: ChannelDispatcher = {
+  send(channel, target, incidentId, log) {
+    return activeDispatcher.send(channel, target, incidentId, log)
+  },
+}
+
+export function _setDispatcherForTest(d: ChannelDispatcher): void {
+  activeDispatcher = d
+}
+
+export function _resetDispatcherForTest(): void {
+  activeDispatcher = new MockDispatcher()
+}

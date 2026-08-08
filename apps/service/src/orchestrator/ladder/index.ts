@@ -2,6 +2,7 @@ import type { DeliveryChannel, Severity } from '@combinado/shared'
 import type { Logger } from '../../shared/logging/index.js'
 import { db } from '../../shared/db/index.js'
 import { dispatcher } from './dispatch.js'
+import { recordDispatchFailure } from './telemetry.js'
 
 // ── Definição da escada ─────────────────────────────────────────────────────
 // Cada degrau tem canal, alvo (primário ou secundário) e tempo de escalação
@@ -193,9 +194,10 @@ async function createStep(
     : guardians.secondary!
 
   const deadlineSeconds = stepDef.def.escalation_seconds[severity]
-  const deadline = new Date(Date.now() + deadlineSeconds * 1000).toISOString()
+  const now = new Date()
+  const deadline = new Date(now.getTime() + deadlineSeconds * 1000).toISOString()
 
-  const { error: insertErr } = await db
+  const { data: delivery, error: insertErr } = await db
     .from('incident_deliveries')
     .insert({
       incident_id: incidentId,
@@ -203,28 +205,43 @@ async function createStep(
       target_guardian_id: guardian.guardian_id,
       target_phone: guardian.phone,
       step_order: stepDef.index,
-      sent_at: new Date().toISOString(),
+      sent_at: now.toISOString(),
       escalation_deadline: deadline,
     })
+    .select('id')
+    .single()
 
-  if (insertErr) {
+  if (insertErr || !delivery) {
     log.error('ladder: falha ao criar delivery step', {
       incident_id: incidentId,
       step_order: stepDef.index,
-      error: insertErr.message,
+      error: insertErr?.message,
     })
     return false
   }
 
-  await dispatcher.send(
+  const result = await dispatcher.send(
     stepDef.def.channel,
     { guardian_id: guardian.guardian_id, phone: guardian.phone },
     incidentId,
     log,
   )
 
-  log.info('ladder: degrau criado', {
+  if (!result.sent) {
+    const reason = `dispatch_failed: ${result.error ?? 'unknown'}`
+    await recordDispatchFailure(delivery.id, reason, log)
+    log.warn('ladder: dispatch falhou, tentando próximo degrau', {
+      incident_id: incidentId,
+      step_order: stepDef.index,
+      channel: stepDef.def.channel,
+      error: result.error,
+    })
+    return createStep(incidentId, stepDef.index + 1, guardians, severity, log)
+  }
+
+  log.info('ladder: degrau criado e enviado', {
     incident_id: incidentId,
+    delivery_id: delivery.id,
     step_order: stepDef.index,
     channel: stepDef.def.channel,
     target: stepDef.def.target,
