@@ -739,7 +739,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T7.2 — Cooldown e deduplicação
+### - [x] T7.2 — Cooldown e deduplicação
 **O que será feito:** implementar janela de cooldown por contato e deduplicação de eventos, para que um golpista não consiga disparar dezenas de alertas repetidos e desarmar a família.
 
 **Como garantir que foi feito corretamente:** rajadas do mesmo padrão **não** geram uma enxurrada de alertas.

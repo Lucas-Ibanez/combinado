@@ -20,7 +20,8 @@
     "test:llm": "tsx tests/llm.smoke.ts",
     "test:policy": "tsx tests/policy.smoke.ts",
     "test:risk-persist": "tsx tests/risk-persist.smoke.ts",
-    "test:incident-upsert": "tsx tests/incident-upsert.smoke.ts"
+    "test:incident-upsert": "tsx tests/incident-upsert.smoke.ts",
+    "test:cooldown": "tsx tests/cooldown.smoke.ts"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

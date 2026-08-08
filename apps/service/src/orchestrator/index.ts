@@ -8,9 +8,11 @@
 // =============================================================================
 import type { IncidentQueueMessage } from '@combinado/shared'
 import type { Logger } from '../shared/logging/index.js'
+import { db } from '../shared/db/index.js'
 import { queue } from '../shared/queue/index.js'
 import type { QueueMessage } from '../shared/queue/types.js'
 import { upsertIncident } from './incidents.js'
+import { checkSuppression, recordProcessed } from './cooldown.js'
 
 export interface OrchestratorHandle {
   stop(): Promise<void>
@@ -43,7 +45,24 @@ export async function startOrchestrator(log: Logger): Promise<OrchestratorHandle
       }
 
       try {
+        // Cooldown e dedup antes de tocar no incidente
+        const suppression = await checkSuppression(body, log)
+        if (suppression.suppressed) {
+          // Se cooldown (não dedup), ainda vincula o risk_event ao incidente
+          // existente para manter a trilha de auditoria completa.
+          if (suppression.reason === 'cooldown') {
+            await linkRiskEventToOpenIncident(body, log)
+          }
+          await queue.ack('incident_queue', msg.msgId)
+          log.info('incident_queue mensagem suprimida', {
+            ...meta,
+            reason: suppression.reason,
+          })
+          continue
+        }
+
         const result = await upsertIncident(body, log)
+        recordProcessed(body)
 
         await queue.ack('incident_queue', msg.msgId)
 
@@ -107,6 +126,34 @@ export async function startOrchestrator(log: Logger): Promise<OrchestratorHandle
       stopped = true
       await inflight
     },
+  }
+}
+
+async function linkRiskEventToOpenIncident(
+  msg: IncidentQueueMessage,
+  log: Logger,
+): Promise<void> {
+  const { data: incident } = await db
+    .from('incidents')
+    .select('id')
+    .eq('family_id', msg.family_id)
+    .eq('protected_person_id', msg.protected_person_id)
+    .eq('source_contact', msg.sender_jid)
+    .in('status', ['open', 'notifying', 'escalated'])
+    .order('opened_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (incident) {
+    await db
+      .from('risk_events')
+      .update({ incident_id: incident.id })
+      .eq('id', msg.risk_event_id)
+
+    log.debug('cooldown: risk_event vinculado ao incidente existente', {
+      risk_event_id: msg.risk_event_id,
+      incident_id: incident.id,
+    })
   }
 }
 
