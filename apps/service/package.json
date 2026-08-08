@@ -18,7 +18,8 @@
     "test:rules": "tsx tests/rules.smoke.ts",
     "test:classifier": "tsx tests/classifier.smoke.ts",
     "test:llm": "tsx tests/llm.smoke.ts",
-    "test:policy": "tsx tests/policy.smoke.ts"
+    "test:policy": "tsx tests/policy.smoke.ts",
+    "test:risk-persist": "tsx tests/risk-persist.smoke.ts"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

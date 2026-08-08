@@ -717,7 +717,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T6.6 — Gravar a decisão e encaminhar ao Orchestrator
+### - [x] T6.6 — Gravar a decisão e encaminhar ao Orchestrator
 **O que será feito:** persistir o `risk_event` (sinal + severidade, **sem** conteúdo bruto) e publicar a decisão para o Incident Orchestrator (via fila ou tabela observada). Descartar da memória o que não precisa ser guardado.
 
 **Como garantir que foi feito corretamente:** uma decisão de alto risco chega ao próximo estágio (o Orchestrator recebe).

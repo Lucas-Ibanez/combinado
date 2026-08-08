@@ -120,6 +120,19 @@ export interface PolicyResult {
   reasons: string[]
 }
 
+export interface IncidentQueueMessage {
+  risk_event_id: string
+  event_id: string
+  family_id: string
+  protected_person_id: string
+  sender_jid: string
+  decision: RiskDecision
+  severity: Severity
+  signals: RiskSignals
+  reasons: string[]
+  processed_at: string
+}
+
 export interface RiskQueueMessage {
   family_id: string
   protected_person_id: string

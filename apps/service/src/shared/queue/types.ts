@@ -1,10 +1,11 @@
 // Nomes das filas do MVP (batem com as criadas em T1.5).
-export type QueueName = 'risk_queue' | 'command_outbox' | 'delivery_queue'
+export type QueueName = 'risk_queue' | 'command_outbox' | 'delivery_queue' | 'incident_queue'
 
 const dlqMap: Record<QueueName, string> = {
   risk_queue: 'risk_queue_dlq',
   command_outbox: 'command_outbox_dlq',
   delivery_queue: 'delivery_queue_dlq',
+  incident_queue: 'incident_queue_dlq',
 }
 
 export function dlqOf(queueName: QueueName): string {

@@ -10,14 +10,17 @@
 // processamento falhar e a mensagem já foi lida mais de MAX_RETRIES vezes,
 // vai para a DLQ em vez de travar a fila.
 // =============================================================================
-import type { MinimalEvent } from '@combinado/shared'
+import type { MinimalEvent, IncidentQueueMessage } from '@combinado/shared'
 import type { Logger } from '../shared/logging/index.js'
+import { db } from '../shared/db/index.js'
 import { queue } from '../shared/queue/index.js'
 import type { QueueMessage } from '../shared/queue/types.js'
 import { evaluateRules } from './rules/index.js'
 import { classifier } from './classifier/index.js'
 import { assessWithLlm } from './llm/index.js'
 import { evaluatePolicy } from './policy/index.js'
+
+const PIPELINE_VERSION = 'v1-rules+ws-classifier+nemotron-ultra+policy'
 
 export interface RiskHandle {
   stop(): Promise<void>
@@ -179,7 +182,61 @@ async function processEvent(event: MinimalEvent, log: Logger): Promise<void> {
     elapsed_ms: Math.round(performance.now() - t0),
   })
 
-  // T6.6: gravar decisão e encaminhar ao Orchestrator
+  // Camada 5: gravar risk_event (sinais + decisão, NUNCA conteúdo bruto)
+  const { data: riskEvent, error: insertErr } = await db
+    .from('risk_events')
+    .insert({
+      family_id: event.family_id,
+      protected_person_id: event.protected_person_id,
+      signals: event.signals,
+      severity: policyResult.severity,
+      decision: policyResult.decision,
+      pipeline_version: PIPELINE_VERSION,
+    })
+    .select('id, processed_at')
+    .single()
+
+  if (insertErr) {
+    throw new Error(`risk_event insert falhou: ${insertErr.message}`)
+  }
+
+  log.info('risk_event gravado', {
+    event_id: event.event_id,
+    risk_event_id: riskEvent.id,
+    decision: policyResult.decision,
+    severity: policyResult.severity,
+  })
+
+  // Encaminhar ao Orchestrator se a decisão requer ação (review ou block)
+  if (policyResult.decision !== 'allow') {
+    const incidentMsg: IncidentQueueMessage = {
+      risk_event_id: riskEvent.id,
+      event_id: event.event_id,
+      family_id: event.family_id,
+      protected_person_id: event.protected_person_id,
+      sender_jid: event.sender_jid,
+      decision: policyResult.decision,
+      severity: policyResult.severity,
+      signals: event.signals,
+      reasons: policyResult.reasons,
+      processed_at: riskEvent.processed_at,
+    }
+
+    await queue.enqueue('incident_queue', incidentMsg)
+
+    log.info('decisão encaminhada ao orchestrator', {
+      event_id: event.event_id,
+      risk_event_id: riskEvent.id,
+      queue: 'incident_queue',
+      decision: policyResult.decision,
+      severity: policyResult.severity,
+    })
+  } else {
+    log.info('decisão allow — sem encaminhamento', {
+      event_id: event.event_id,
+      risk_event_id: riskEvent.id,
+    })
+  }
 }
 
 function sleep(ms: number): Promise<void> {
