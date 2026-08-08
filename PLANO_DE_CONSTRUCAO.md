@@ -766,7 +766,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T7.5 — Encerrar/reabrir e reagir à confirmação
+### - [x] T7.5 — Encerrar/reabrir e reagir à confirmação
 **O que será feito:** ao receber o ack (via `acknowledge-incident`), parar a escada e fechar o incidente. Permitir reabertura se novo sinal chegar. Garantir que o Orchestrator funciona mesmo se o Risk Worker ou o app reiniciarem.
 
 **Como garantir que foi feito corretamente:** confirmar interrompe a escada; um novo sinal pode reabrir um incidente relacionado.

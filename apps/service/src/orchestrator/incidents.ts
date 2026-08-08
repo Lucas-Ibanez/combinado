@@ -9,6 +9,7 @@ const OPEN_STATUSES = ['open', 'notifying', 'escalated'] as const
 export interface UpsertResult {
   incident_id: string
   created: boolean
+  reopened: boolean
   severity: Severity
   previous_severity?: Severity
 }
@@ -35,6 +36,27 @@ export async function upsertIncident(
 
   if (existing) {
     return await groupIntoExisting(existing, msg, log)
+  }
+
+  // Verificar se existe um incidente recém-confirmado para o mesmo contato.
+  // Se sim, reabrir em vez de criar novo — novo sinal invalida o ack anterior.
+  const { data: acked, error: ackedErr } = await db
+    .from('incidents')
+    .select('id, severity, status')
+    .eq('family_id', msg.family_id)
+    .eq('protected_person_id', msg.protected_person_id)
+    .eq('source_contact', msg.sender_jid)
+    .eq('status', 'acknowledged')
+    .order('acknowledged_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (ackedErr) {
+    throw new Error(`buscar incidente acknowledged falhou: ${ackedErr.message}`)
+  }
+
+  if (acked) {
+    return await reopenIncident(acked, msg, log)
   }
 
   return await createNew(msg, log)
@@ -80,6 +102,7 @@ async function groupIntoExisting(
   return {
     incident_id: existing.id,
     created: false,
+    reopened: false,
     severity: shouldUpgrade ? newSeverity : currentSeverity,
     previous_severity: shouldUpgrade ? currentSeverity : undefined,
   }
@@ -121,7 +144,50 @@ async function createNew(
   return {
     incident_id: incident.id,
     created: true,
+    reopened: false,
     severity: msg.severity as Severity,
+  }
+}
+
+async function reopenIncident(
+  acked: { id: string; severity: string; status: string },
+  msg: IncidentQueueMessage,
+  log: Logger,
+): Promise<UpsertResult> {
+  const currentSeverity = acked.severity as Severity
+  const newSeverity = msg.severity as Severity
+  const shouldUpgrade = SEVERITY_RANK[newSeverity] > SEVERITY_RANK[currentSeverity]
+  const finalSeverity = shouldUpgrade ? newSeverity : currentSeverity
+
+  const { error: updateErr } = await db
+    .from('incidents')
+    .update({
+      status: 'open',
+      severity: finalSeverity,
+      acknowledged_at: null,
+      acknowledged_by: null,
+    })
+    .eq('id', acked.id)
+
+  if (updateErr) {
+    throw new Error(`reabrir incidente falhou: ${updateErr.message}`)
+  }
+
+  await linkRiskEvent(msg.risk_event_id, acked.id)
+
+  log.info('incidente reaberto por novo sinal', {
+    incident_id: acked.id,
+    risk_event_id: msg.risk_event_id,
+    previous_severity: currentSeverity,
+    new_severity: finalSeverity,
+  })
+
+  return {
+    incident_id: acked.id,
+    created: false,
+    reopened: true,
+    severity: finalSeverity,
+    previous_severity: shouldUpgrade ? currentSeverity : undefined,
   }
 }
 

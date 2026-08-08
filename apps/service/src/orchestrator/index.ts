@@ -66,7 +66,7 @@ export async function startOrchestrator(log: Logger): Promise<OrchestratorHandle
         const result = await upsertIncident(body, log)
         recordProcessed(body)
 
-        if (result.created) {
+        if (result.created || result.reopened) {
           await startLadder(
             result.incident_id,
             body.protected_person_id,
@@ -81,7 +81,8 @@ export async function startOrchestrator(log: Logger): Promise<OrchestratorHandle
           ...meta,
           incident_id: result.incident_id,
           created: result.created,
-          ladder_started: result.created,
+          reopened: result.reopened,
+          ladder_started: result.created || result.reopened,
           final_severity: result.severity,
         })
       } catch (err) {
