@@ -17,6 +17,7 @@ import type { QueueMessage } from '../shared/queue/types.js'
 import { evaluateRules } from './rules/index.js'
 import { classifier } from './classifier/index.js'
 import { assessWithLlm } from './llm/index.js'
+import { evaluatePolicy } from './policy/index.js'
 
 export interface RiskHandle {
   stop(): Promise<void>
@@ -110,15 +111,11 @@ export async function startRisk(log: Logger): Promise<RiskHandle> {
   }
 }
 
-// Pipeline de risco — camadas sequenciais.
-// Camada 1 (regras) pode short-circuit: se o caso é óbvio, não precisa do
-// classificador nem do LLM. Camadas 2-4 entram em T6.3→T6.5.
 async function processEvent(event: MinimalEvent, log: Logger): Promise<void> {
   const t0 = performance.now()
 
   // Camada 1: regras determinísticas
   const ruleResult = evaluateRules(event)
-  const elapsed = Math.round(performance.now() - t0)
 
   log.info('regras avaliadas', {
     event_id: event.event_id,
@@ -128,45 +125,61 @@ async function processEvent(event: MinimalEvent, log: Logger): Promise<void> {
     severity: ruleResult.severity,
     triggered_rules: ruleResult.triggered_rules,
     short_circuit: ruleResult.short_circuit,
-    elapsed_ms: elapsed,
+    elapsed_ms: Math.round(performance.now() - t0),
   })
 
-  if (ruleResult.short_circuit) {
-    log.info('short-circuit: regras decidiram sem LLM', {
-      event_id: event.event_id,
-      decision: ruleResult.decision,
-      severity: ruleResult.severity,
-    })
-    // T6.5 (política) e T7 (orchestrator) consomem o resultado daqui.
-    return
-  }
-
-  // Camada 2: classificador estreito — score heurístico para casos que as
-  // regras não fecharam (medium ou low).
+  // Camada 2: classificador estreito
   const classResult = classifier.classify(event)
 
-  log.info('classificador avaliado', {
-    event_id: event.event_id,
-    score: classResult.score,
-    classifier_version: classResult.version,
+  if (!ruleResult.short_circuit) {
+    log.info('classificador avaliado', {
+      event_id: event.event_id,
+      score: classResult.score,
+      classifier_version: classResult.version,
+    })
+  }
+
+  // Camada 3: LLM como apoio (só se regras não fizeram short-circuit)
+  let llmResult: Awaited<ReturnType<typeof assessWithLlm>>
+  if (ruleResult.short_circuit) {
+    llmResult = {
+      assessment: null,
+      used_fallback: true,
+      model: 'skipped',
+      prompt_version: 'skipped',
+      latency_ms: 0,
+      error: 'short_circuit',
+    }
+  } else {
+    llmResult = await assessWithLlm(event, classResult.score, log)
+    log.info('LLM avaliado', {
+      event_id: event.event_id,
+      used_fallback: llmResult.used_fallback,
+      llm_model: llmResult.model,
+      prompt_version: llmResult.prompt_version,
+      latency_ms: llmResult.latency_ms,
+      risk_assessment: llmResult.assessment?.risk_assessment ?? null,
+      confidence: llmResult.assessment?.confidence ?? null,
+      error: llmResult.error ?? null,
+    })
+  }
+
+  // Camada 4: política determinística — a autoridade
+  const policyResult = evaluatePolicy({
+    rules: ruleResult,
+    classifier: classResult,
+    llm: llmResult,
   })
 
-  // Camada 3: LLM como apoio — só para casos ambíguos (score intermediário).
-  // Se as regras não fizeram short-circuit, o LLM dá uma segunda opinião.
-  const llmResult = await assessWithLlm(event, classResult.score, log)
-
-  log.info('LLM avaliado', {
+  log.info('política decidiu', {
     event_id: event.event_id,
-    used_fallback: llmResult.used_fallback,
-    llm_model: llmResult.model,
-    prompt_version: llmResult.prompt_version,
-    latency_ms: llmResult.latency_ms,
-    risk_assessment: llmResult.assessment?.risk_assessment ?? null,
-    confidence: llmResult.assessment?.confidence ?? null,
-    error: llmResult.error ?? null,
+    decision: policyResult.decision,
+    severity: policyResult.severity,
+    reasons: policyResult.reasons,
+    elapsed_ms: Math.round(performance.now() - t0),
   })
 
-  // T6.5: política determinística final
+  // T6.6: gravar decisão e encaminhar ao Orchestrator
 }
 
 function sleep(ms: number): Promise<void> {

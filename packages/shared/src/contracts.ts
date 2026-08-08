@@ -114,6 +114,12 @@ export interface LlmResult {
   error?: string
 }
 
+export interface PolicyResult {
+  decision: RiskDecision
+  severity: Severity
+  reasons: string[]
+}
+
 export interface RiskQueueMessage {
   family_id: string
   protected_person_id: string

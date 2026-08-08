@@ -708,7 +708,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T6.5 — Camada 4: política determinística (a autoridade)
+### - [x] T6.5 — Camada 4: política determinística (a autoridade)
 **O que será feito:** em `risk/policy`, combinar os sinais (regras + classificador + LLM) numa **decisão e severidade** por código auditável. É esta camada — **não** o LLM — que decide se abre incidente e em que nível.
 
 **Como garantir que foi feito corretamente:** a decisão final é **reproduzível** e explicável a partir dos sinais de entrada (dado o mesmo conjunto de sinais, a mesma decisão).
