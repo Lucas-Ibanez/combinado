@@ -16,6 +16,7 @@ import { queue } from '../shared/queue/index.js'
 import type { QueueMessage } from '../shared/queue/types.js'
 import { evaluateRules } from './rules/index.js'
 import { classifier } from './classifier/index.js'
+import { assessWithLlm } from './llm/index.js'
 
 export interface RiskHandle {
   stop(): Promise<void>
@@ -150,7 +151,21 @@ async function processEvent(event: MinimalEvent, log: Logger): Promise<void> {
     classifier_version: classResult.version,
   })
 
-  // T6.4: LLM como apoio (só ambíguos)
+  // Camada 3: LLM como apoio — só para casos ambíguos (score intermediário).
+  // Se as regras não fizeram short-circuit, o LLM dá uma segunda opinião.
+  const llmResult = await assessWithLlm(event, classResult.score, log)
+
+  log.info('LLM avaliado', {
+    event_id: event.event_id,
+    used_fallback: llmResult.used_fallback,
+    llm_model: llmResult.model,
+    prompt_version: llmResult.prompt_version,
+    latency_ms: llmResult.latency_ms,
+    risk_assessment: llmResult.assessment?.risk_assessment ?? null,
+    confidence: llmResult.assessment?.confidence ?? null,
+    error: llmResult.error ?? null,
+  })
+
   // T6.5: política determinística final
 }
 

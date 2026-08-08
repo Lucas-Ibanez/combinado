@@ -14,7 +14,7 @@ const envSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(20, { message: 'chave de service role muito curta' }),
 
   // LLM — obrigatório a partir da F6 (motor de risco)
-  ANTHROPIC_API_KEY: z.string().min(1).optional(),
+  NVIDIA_API_KEY: z.string().min(1).optional(),
 
   // Canais — obrigatórios a partir da F9 (orquestrador)
   TWILIO_ACCOUNT_SID: z.string().min(1).optional(),

@@ -693,7 +693,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T6.4 — Camada 3: LLM como apoio (blindado)
+### - [x] T6.4 — Camada 3: LLM como apoio (blindado)
 **O que será feito:** em `risk/llm`, chamar a API do Claude (SDK `@anthropic-ai/sdk`) **só para casos ambíguos**. Regras de segurança obrigatórias:
 - Conteúdo entra **delimitado como dado não-confiável** (mensagens do atacante são entrada adversarial).
 - O modelo **não tem ferramentas**.

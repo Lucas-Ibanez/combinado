@@ -99,6 +99,21 @@ export interface ClassifierResult {
   version: string
 }
 
+export interface LlmAssessment {
+  risk_assessment: 'low' | 'medium' | 'high'
+  confidence: number
+  reasoning: string
+}
+
+export interface LlmResult {
+  assessment: LlmAssessment | null
+  used_fallback: boolean
+  model: string
+  prompt_version: string
+  latency_ms: number
+  error?: string
+}
+
 export interface RiskQueueMessage {
   family_id: string
   protected_person_id: string
