@@ -748,7 +748,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T7.3 — Máquina de estados da escada de entrega
+### - [x] T7.3 — Máquina de estados da escada de entrega
 **O que será feito:** em `orchestrator/ladder`, modelar os degraus e os timers de escalonamento: **push → WhatsApp/SMS → ligação → 2º guardião → estado "sem confirmação"**. Cada transição dispara a próxima **só se** não houve confirmação na janela.
 
 **Como garantir que foi feito corretamente:** sem confirmação, a escada avança sozinha de degrau em degrau até o estado final "sem confirmação" (testar com canais mockados).

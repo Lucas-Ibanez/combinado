@@ -4,7 +4,8 @@
 // Responsabilidade: consumir decisões da incident_queue (publicadas pelo Risk
 // Worker) e transformá-las em incidentes com estado. Se já existe um incidente
 // aberto para o mesmo contato/protegido, agrupa em vez de criar novo (antídoto
-// a alert fatigue). A escada de entrega multicanal entra na F9.
+// a alert fatigue). A escada de entrega avança automaticamente se ninguém
+// confirma dentro da janela de cada degrau.
 // =============================================================================
 import type { IncidentQueueMessage } from '@combinado/shared'
 import type { Logger } from '../shared/logging/index.js'
@@ -13,6 +14,7 @@ import { queue } from '../shared/queue/index.js'
 import type { QueueMessage } from '../shared/queue/types.js'
 import { upsertIncident } from './incidents.js'
 import { checkSuppression, recordProcessed } from './cooldown.js'
+import { startLadder, tickLadder } from './ladder/index.js'
 
 export interface OrchestratorHandle {
   stop(): Promise<void>
@@ -64,12 +66,22 @@ export async function startOrchestrator(log: Logger): Promise<OrchestratorHandle
         const result = await upsertIncident(body, log)
         recordProcessed(body)
 
+        if (result.created) {
+          await startLadder(
+            result.incident_id,
+            body.protected_person_id,
+            result.severity,
+            log,
+          )
+        }
+
         await queue.ack('incident_queue', msg.msgId)
 
         log.info('incident_queue mensagem processada', {
           ...meta,
           incident_id: result.incident_id,
           created: result.created,
+          ladder_started: result.created,
           final_severity: result.severity,
         })
       } catch (err) {
@@ -113,6 +125,18 @@ export async function startOrchestrator(log: Logger): Promise<OrchestratorHandle
           error_name: (err as Error).name,
         })
       }
+
+      try {
+        const escalated = await tickLadder(log)
+        if (escalated > 0) {
+          log.info('ladder tick: degraus avançados', { count: escalated })
+        }
+      } catch (err) {
+        log.error('erro no tick da ladder', {
+          error_name: (err as Error).name,
+        })
+      }
+
       if (stopped) return
       await sleep(POLL_INTERVAL_MS)
     }
