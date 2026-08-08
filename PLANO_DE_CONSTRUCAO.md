@@ -684,7 +684,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T6.3 — Camada 2: classificador estreito
+### - [x] T6.3 — Camada 2: classificador estreito
 **O que será feito:** em `risk/classifier`, produzir uma probabilidade calibrada de golpe para os casos que as regras não fecham. No MVP, uma heurística de pontuação combinando os sinais; a interface fica pronta para um modelo treinado depois.
 
 **Como garantir que foi feito corretamente:** casos intermediários recebem um score coerente (nem alto nem baixo demais para o que são).

@@ -15,7 +15,8 @@
     "test:risk-publish": "tsx tests/risk-queue-publish.smoke.ts",
     "test:reconnect": "tsx tests/reconnect-health.smoke.ts",
     "test:risk-consume": "tsx tests/risk-consume.smoke.ts",
-    "test:rules": "tsx tests/rules.smoke.ts"
+    "test:rules": "tsx tests/rules.smoke.ts",
+    "test:classifier": "tsx tests/classifier.smoke.ts"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

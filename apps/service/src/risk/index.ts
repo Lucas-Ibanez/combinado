@@ -15,6 +15,7 @@ import type { Logger } from '../shared/logging/index.js'
 import { queue } from '../shared/queue/index.js'
 import type { QueueMessage } from '../shared/queue/types.js'
 import { evaluateRules } from './rules/index.js'
+import { classifier } from './classifier/index.js'
 
 export interface RiskHandle {
   stop(): Promise<void>
@@ -130,8 +131,6 @@ async function processEvent(event: MinimalEvent, log: Logger): Promise<void> {
   })
 
   if (ruleResult.short_circuit) {
-    // Caso óbvio — a regra já decidiu. O LLM pode enriquecer a explicação
-    // depois, mas a ação sai agora.
     log.info('short-circuit: regras decidiram sem LLM', {
       event_id: event.event_id,
       decision: ruleResult.decision,
@@ -141,7 +140,16 @@ async function processEvent(event: MinimalEvent, log: Logger): Promise<void> {
     return
   }
 
-  // T6.3: classificador estreito (score heurístico)
+  // Camada 2: classificador estreito — score heurístico para casos que as
+  // regras não fecharam (medium ou low).
+  const classResult = classifier.classify(event)
+
+  log.info('classificador avaliado', {
+    event_id: event.event_id,
+    score: classResult.score,
+    classifier_version: classResult.version,
+  })
+
   // T6.4: LLM como apoio (só ambíguos)
   // T6.5: política determinística final
 }

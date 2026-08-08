@@ -94,6 +94,11 @@ export interface RuleResult {
   short_circuit: boolean
 }
 
+export interface ClassifierResult {
+  score: number
+  version: string
+}
+
 export interface RiskQueueMessage {
   family_id: string
   protected_person_id: string
