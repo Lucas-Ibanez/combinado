@@ -732,7 +732,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T7.1 — Criar/atualizar o incidente
+### - [x] T7.1 — Criar/atualizar o incidente
 **O que será feito:** ao receber uma decisão, abrir um `incident` com estado inicial e severidade. Se já houver incidente aberto para o mesmo contato/conversa, **agrupar** em vez de criar outro (base do antídoto a alert fatigue).
 
 **Como garantir que foi feito corretamente:** decisões viram incidentes; repetições do mesmo contato agrupam no mesmo incidente em vez de criar vários.
