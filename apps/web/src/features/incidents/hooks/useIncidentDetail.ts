@@ -7,7 +7,7 @@ export function useIncidentDetail(incidentId: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('incidents')
-        .select('*, protected_persons(display_name), incident_deliveries(*)')
+        .select('*, protected_persons(display_name, phone), incident_deliveries(*)')
         .eq('id', incidentId!)
         .single()
 

@@ -800,7 +800,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T8.3 — Modo incidente (UI de crise)
+### - [x] T8.3 — Modo incidente (UI de crise)
 **O que será feito:** quando há incidente ativo, o app **rompe o tom calmo**: ação primária **"Ligar para minha mãe"** e alternativas **visíveis** (*"Fui eu quem pediu"*, *"Não reconheço este pedido"*, *"Chamar outro guardião"*) — nunca escondidas em menu. Linguagem direta, sem probabilidade ("pedido urgente de Pix de número novo", não "risco 0,87").
 
 **Como garantir que foi feito corretamente:** um incidente ativo mostra a tela diretiva com a ação primária e as alternativas visíveis.

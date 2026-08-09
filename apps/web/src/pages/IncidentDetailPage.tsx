@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router-dom'
 import { useIncidentDetail } from '@/features/incidents/hooks/useIncidentDetail'
 import DeliveryTimeline from '@/features/incidents/components/DeliveryTimeline'
+import CrisisView from '@/features/incidents/components/CrisisView'
 import type { Severity, IncidentStatus, IncidentDelivery } from '@combinado/shared'
 
 const SEVERITY_STYLES: Record<Severity, string> = {
@@ -25,6 +26,8 @@ const STATUS_LABELS: Record<IncidentStatus, string> = {
   expired: 'Expirado',
   closed: 'Encerrado',
 }
+
+const ACTIVE_STATUSES = new Set<string>(['open', 'notifying', 'escalated'])
 
 function formatDateTime(dateStr: string): string {
   return new Date(dateStr).toLocaleString('pt-BR', {
@@ -61,9 +64,24 @@ export default function IncidentDetailPage() {
 
   const severity = incident.severity as Severity
   const status = incident.status as IncidentStatus
-  const personName =
-    incident.protected_persons?.display_name ?? 'Protegido'
+  const personName = incident.protected_persons?.display_name ?? 'Protegido'
+  const personPhone = incident.protected_persons?.phone ?? null
   const deliveries = (incident.incident_deliveries ?? []) as IncidentDelivery[]
+  const isActive = ACTIVE_STATUSES.has(status)
+
+  if (isActive) {
+    return (
+      <CrisisView
+        personName={personName}
+        personPhone={personPhone}
+        severity={severity}
+        summary={incident.summary}
+        openedAt={incident.opened_at}
+        incidentId={incident.id}
+        deliveries={deliveries}
+      />
+    )
+  }
 
   return (
     <div className="p-4 pb-6">
