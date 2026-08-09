@@ -809,7 +809,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T8.4 — Confirmação → `acknowledge-incident`
+### - [x] T8.4 — Confirmação → `acknowledge-incident`
 **O que será feito:** as ações do modo incidente chamam a Command API de confirmação (F2/T2.3), que muda o estado e para a escada. Refletir o novo estado na UI na hora.
 
 **Como garantir que foi feito corretamente:** confirmar no app interrompe a escada no serviço (o incidente muda de estado e a escalada para).

@@ -1,5 +1,6 @@
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useIncidentDetail } from '@/features/incidents/hooks/useIncidentDetail'
+import { useAcknowledgeIncident } from '@/features/incidents/hooks/useAcknowledgeIncident'
 import DeliveryTimeline from '@/features/incidents/components/DeliveryTimeline'
 import CrisisView from '@/features/incidents/components/CrisisView'
 import type { Severity, IncidentStatus, IncidentDelivery } from '@combinado/shared'
@@ -41,7 +42,9 @@ function formatDateTime(dateStr: string): string {
 
 export default function IncidentDetailPage() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const { data: incident, isLoading, error } = useIncidentDetail(id)
+  const ackMutation = useAcknowledgeIncident()
 
   if (isLoading) {
     return (
@@ -69,6 +72,19 @@ export default function IncidentDetailPage() {
   const deliveries = (incident.incident_deliveries ?? []) as IncidentDelivery[]
   const isActive = ACTIVE_STATUSES.has(status)
 
+  const handleAcknowledge = (action: string) => {
+    if (ackMutation.isPending) return
+    ackMutation.mutate(
+      { incidentId: incident.id },
+      {
+        onSuccess: () => {
+          if (action === 'escalate') return
+          navigate('/alerts')
+        },
+      },
+    )
+  }
+
   if (isActive) {
     return (
       <CrisisView
@@ -79,6 +95,9 @@ export default function IncidentDetailPage() {
         openedAt={incident.opened_at}
         incidentId={incident.id}
         deliveries={deliveries}
+        onAcknowledge={handleAcknowledge}
+        isPending={ackMutation.isPending}
+        ackError={ackMutation.error?.message ?? null}
       />
     )
   }

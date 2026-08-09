@@ -10,6 +10,8 @@ interface CrisisViewProps {
   incidentId: string
   deliveries: IncidentDelivery[]
   onAcknowledge?: (action: string) => void
+  isPending?: boolean
+  ackError?: string | null
 }
 
 const SEVERITY_HEADLINE: Record<Severity, string> = {
@@ -56,6 +58,8 @@ export default function CrisisView({
   openedAt,
   deliveries,
   onAcknowledge,
+  isPending = false,
+  ackError = null,
 }: CrisisViewProps) {
   const signals = parseSignals(summary)
   const currentStep = deliveries.filter((d) => !d.failure_reason && !d.acknowledged_at).length
@@ -117,32 +121,39 @@ export default function CrisisView({
             Ligar para {personName}
           </a>
 
+          {ackError && (
+            <p className="text-sm text-danger text-center">{ackError}</p>
+          )}
+
           <div className="grid grid-cols-1 gap-2">
             <button
               type="button"
+              disabled={isPending}
               onClick={() => onAcknowledge?.('safe_confirmed')}
-              className="flex items-center gap-3 w-full rounded-xl border-2 border-brand bg-surface py-3.5 px-4 text-sm font-semibold text-brand transition-colors active:bg-brand-surface"
+              className="flex items-center gap-3 w-full rounded-xl border-2 border-brand bg-surface py-3.5 px-4 text-sm font-semibold text-brand transition-colors active:bg-brand-surface disabled:opacity-50"
             >
               <MessageCircleWarning className="w-5 h-5 shrink-0" />
-              Fui eu quem pediu — está tudo bem
+              {isPending ? 'Confirmando...' : 'Fui eu quem pediu — está tudo bem'}
             </button>
 
             <button
               type="button"
+              disabled={isPending}
               onClick={() => onAcknowledge?.('threat_confirmed')}
-              className="flex items-center gap-3 w-full rounded-xl border-2 border-danger bg-surface py-3.5 px-4 text-sm font-semibold text-danger transition-colors active:bg-danger-surface"
+              className="flex items-center gap-3 w-full rounded-xl border-2 border-danger bg-surface py-3.5 px-4 text-sm font-semibold text-danger transition-colors active:bg-danger-surface disabled:opacity-50"
             >
               <ShieldAlert className="w-5 h-5 shrink-0" />
-              Não reconheço este pedido
+              {isPending ? 'Confirmando...' : 'Não reconheço este pedido'}
             </button>
 
             <button
               type="button"
+              disabled={isPending}
               onClick={() => onAcknowledge?.('escalate')}
-              className="flex items-center gap-3 w-full rounded-xl border-2 border-attention bg-surface py-3.5 px-4 text-sm font-semibold text-attention transition-colors active:bg-attention-surface"
+              className="flex items-center gap-3 w-full rounded-xl border-2 border-attention bg-surface py-3.5 px-4 text-sm font-semibold text-attention transition-colors active:bg-attention-surface disabled:opacity-50"
             >
               <UserPlus className="w-5 h-5 shrink-0" />
-              Chamar outro guardião
+              {isPending ? 'Confirmando...' : 'Chamar outro guardião'}
             </button>
           </div>
         </div>
