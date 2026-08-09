@@ -15,7 +15,7 @@
 //   4. A · Session Gateway (produtor — sobe por último, quando o consumo já
 //      está pronto para receber eventos)
 //   5. Handlers de shutdown (SIGINT/SIGTERM)
-//   (F9) 6. Servidor HTTP para webhooks — entra aqui depois
+//   6. Servidor HTTP para webhooks (T9.1)
 // =============================================================================
 import { config } from './shared/config/index.js'
 import { db } from './shared/db/index.js'
@@ -23,6 +23,7 @@ import { createLogger } from './shared/logging/index.js'
 import { startGateway } from './gateway/index.js'
 import { startRisk } from './risk/index.js'
 import { startOrchestrator } from './orchestrator/index.js'
+import { startHttpServer } from './http/index.js'
 
 const log = createLogger('bootstrap')
 
@@ -41,14 +42,16 @@ async function main() {
   const orchestrator = await startOrchestrator(createLogger('orchestrator'))
   const risk = await startRisk(createLogger('risk'))
   const gateway = await startGateway(createLogger('gateway'))
+  const http = startHttpServer(createLogger('http'))
 
-  log.info('serviço no ar', { roles: ['gateway', 'risk', 'orchestrator'] })
+  log.info('serviço no ar', { roles: ['gateway', 'risk', 'orchestrator', 'http'] })
 
   async function shutdown(signal: string) {
     log.info('shutdown iniciado', { signal })
     try {
       // Fecha na ordem inversa: produtor primeiro (para de gerar), depois
       // consumidores (drenam o que já enfileiraram).
+      await http.stop()
       await gateway.stop()
       await risk.stop()
       await orchestrator.stop()

@@ -24,7 +24,8 @@
     "test:cooldown": "tsx tests/cooldown.smoke.ts",
     "test:ladder": "tsx tests/ladder.smoke.ts",
     "test:delivery-telemetry": "tsx tests/delivery-telemetry.smoke.ts",
-    "test:lifecycle": "tsx tests/lifecycle.smoke.ts"
+    "test:lifecycle": "tsx tests/lifecycle.smoke.ts",
+    "test:webhook": "tsx tests/webhook-server.smoke.ts"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

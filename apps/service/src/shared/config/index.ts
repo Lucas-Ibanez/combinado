@@ -21,6 +21,11 @@ const envSchema = z.object({
   TWILIO_AUTH_TOKEN: z.string().min(1).optional(),
   VAPID_PUBLIC_KEY: z.string().min(1).optional(),
   VAPID_PRIVATE_KEY: z.string().min(1).optional(),
+
+  // Servidor HTTP para webhooks (T9.1)
+  WEBHOOK_PORT: z.coerce.number().int().positive().default(3100),
+  WHATSAPP_VERIFY_TOKEN: z.string().min(1).optional(),
+  WHATSAPP_APP_SECRET: z.string().min(1).optional(),
 })
 
 export type Config = z.infer<typeof envSchema>

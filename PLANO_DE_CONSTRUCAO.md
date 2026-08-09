@@ -831,7 +831,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T9.1 — Servidor HTTP para webhooks
+### - [x] T9.1 — Servidor HTTP para webhooks
 **O que será feito:** em `src/http`, subir um servidor leve (Hono + `@hono/node-server`) **só** para os webhooks dos provedores (Twilio, status do WhatsApp). Autenticados por **assinatura do provedor**.
 
 **Como garantir que foi feito corretamente:** um webhook de teste chega e é **validado por assinatura** (rejeita requisição sem assinatura válida).
