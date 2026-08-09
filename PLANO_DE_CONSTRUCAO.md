@@ -816,7 +816,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T8.5 — Tela "Estado da Proteção"
+### - [x] T8.5 — Tela "Estado da Proteção"
 **O que será feito:** painel que mostra, com **destaque**, a saúde da sessão (conectada/desconectada), última mensagem processada, canais de alerta ativos, opt-in do protegido e guardião de plantão. Desconexão **nunca** é um pontinho cinza — é um aviso proeminente com ação de reconexão.
 
 **Como garantir que foi feito corretamente:** derrubar a sessão do Gateway acende um alerta claro de "proteção interrompida" nesta tela.

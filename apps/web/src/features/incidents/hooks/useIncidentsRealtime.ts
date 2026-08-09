@@ -11,10 +11,12 @@ export function useIncidentsRealtime() {
     const invalidate = () => {
       queryClient.invalidateQueries({ queryKey: ['incidents'] })
       queryClient.invalidateQueries({ queryKey: ['incident'] })
+      queryClient.invalidateQueries({ queryKey: ['protected-persons'] })
+      queryClient.invalidateQueries({ queryKey: ['guardians'] })
     }
 
     const channel = supabase
-      .channel('incidents-realtime')
+      .channel('app-realtime')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'incidents' },
@@ -23,6 +25,16 @@ export function useIncidentsRealtime() {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'incident_deliveries' },
+        invalidate,
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'protected_persons' },
+        invalidate,
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'guardians' },
         invalidate,
       )
       .subscribe((status) => {
