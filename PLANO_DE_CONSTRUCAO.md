@@ -791,7 +791,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T8.2 — Realtime como dica + reconciliação
+### - [x] T8.2 — Realtime como dica + reconciliação
 **O que será feito:** assinar o Supabase Realtime **só** para saber "há algo novo" e então **buscar o estado** por ID. Ao abrir/reconectar, carregar todos os incidentes não reconhecidos e reconciliar **antes** de voltar a ouvir.
 
 **Como garantir que foi feito corretamente:** desligar e religar a rede **não** faz o app perder incidentes (ele reconcilia buscando o estado autoritativo).

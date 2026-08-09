@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import { useIncidentsRealtime } from '@/features/incidents/hooks/useIncidentsRealtime'
 
 const navItems = [
   { to: '/', label: 'Início' },
@@ -8,6 +9,8 @@ const navItems = [
 ]
 
 export default function AppLayout() {
+  useIncidentsRealtime()
+
   return (
     <div className="min-h-screen bg-surface flex flex-col">
       <main className="flex-1">
