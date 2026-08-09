@@ -782,7 +782,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T8.1 — Lista e detalhe de incidentes (estado autoritativo)
+### - [x] T8.1 — Lista e detalhe de incidentes (estado autoritativo)
 **O que será feito:** tela que lista os incidentes da família e um detalhe com a linha do tempo das entregas. A fonte é **sempre** o banco (busca autoritativa), não um cache de eventos.
 
 **Como garantir que foi feito corretamente:** incidentes reais gerados pelo serviço aparecem no app com seu histórico de entregas.
