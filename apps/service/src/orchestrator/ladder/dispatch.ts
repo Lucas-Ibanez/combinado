@@ -11,6 +11,12 @@ export interface DispatchResult {
   error?: string
 }
 
+export type ChannelSendFn = (
+  target: DispatchTarget,
+  incidentId: string,
+  log: Logger,
+) => Promise<DispatchResult>
+
 export interface ChannelDispatcher {
   send(
     channel: DeliveryChannel,
@@ -20,13 +26,10 @@ export interface ChannelDispatcher {
   ): Promise<DispatchResult>
 }
 
-class MockDispatcher implements ChannelDispatcher {
-  async send(
-    channel: DeliveryChannel,
-    target: DispatchTarget,
-    incidentId: string,
-    log: Logger,
-  ): Promise<DispatchResult> {
+const channelHandlers = new Map<DeliveryChannel, ChannelSendFn>()
+
+function mockSend(channel: DeliveryChannel): ChannelSendFn {
+  return async (target, incidentId, log) => {
     log.info('canal mockado: envio simulado', {
       channel,
       guardian_id: target.guardian_id,
@@ -36,18 +39,24 @@ class MockDispatcher implements ChannelDispatcher {
   }
 }
 
-let activeDispatcher: ChannelDispatcher = new MockDispatcher()
+export function registerChannel(channel: DeliveryChannel, handler: ChannelSendFn): void {
+  channelHandlers.set(channel, handler)
+}
 
 export const dispatcher: ChannelDispatcher = {
   send(channel, target, incidentId, log) {
-    return activeDispatcher.send(channel, target, incidentId, log)
+    const handler = channelHandlers.get(channel) ?? mockSend(channel)
+    return handler(target, incidentId, log)
   },
 }
 
 export function _setDispatcherForTest(d: ChannelDispatcher): void {
-  activeDispatcher = d
+  channelHandlers.clear()
+  for (const ch of ['push', 'whatsapp', 'sms', 'call'] as DeliveryChannel[]) {
+    channelHandlers.set(ch, (t, i, l) => d.send(ch, t, i, l))
+  }
 }
 
 export function _resetDispatcherForTest(): void {
-  activeDispatcher = new MockDispatcher()
+  channelHandlers.clear()
 }

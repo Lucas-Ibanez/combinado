@@ -24,6 +24,8 @@ import { startGateway } from './gateway/index.js'
 import { startRisk } from './risk/index.js'
 import { startOrchestrator } from './orchestrator/index.js'
 import { startHttpServer } from './http/index.js'
+import { startOfficialSession, WhatsAppChannel } from './orchestrator/channels/index.js'
+import { registerChannel } from './orchestrator/ladder/dispatch.js'
 
 const log = createLogger('bootstrap')
 
@@ -38,13 +40,24 @@ async function main() {
   await checkDatabase()
   log.info('banco OK')
 
+  // Sessão oficial do Combinado (Baileys para envio de alertas via WhatsApp).
+  // Sobe antes do orchestrator para que o canal já esteja disponível quando
+  // a escada precisar enviar.
+  const officialLog = createLogger('official-session')
+  const officialSession = await startOfficialSession(officialLog)
+  const whatsappChannel = new WhatsAppChannel(officialSession)
+  registerChannel('whatsapp', (target, incidentId, channelLog) =>
+    whatsappChannel.send(target, incidentId, channelLog),
+  )
+  log.info('canal whatsapp registrado', { health: officialSession.health() })
+
   // Ordem: consumidores primeiro, produtor depois.
   const orchestrator = await startOrchestrator(createLogger('orchestrator'))
   const risk = await startRisk(createLogger('risk'))
   const gateway = await startGateway(createLogger('gateway'))
   const http = startHttpServer(createLogger('http'))
 
-  log.info('serviço no ar', { roles: ['gateway', 'risk', 'orchestrator', 'http'] })
+  log.info('serviço no ar', { roles: ['gateway', 'risk', 'orchestrator', 'http', 'official-wa'] })
 
   async function shutdown(signal: string) {
     log.info('shutdown iniciado', { signal })
@@ -55,6 +68,7 @@ async function main() {
       await gateway.stop()
       await risk.stop()
       await orchestrator.stop()
+      await officialSession.stop()
       log.info('shutdown concluído')
       process.exit(0)
     } catch (err) {

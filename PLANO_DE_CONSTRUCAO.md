@@ -840,21 +840,21 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T9.2 — WhatsApp Business: número, template e opt-in
-**O que será feito:** configurar o número oficial na Cloud API (Graph API da Meta — sem SDK obrigatório, dá para usar `fetch`). Criar e submeter um **template utilitário** pré-aprovado (texto não pode ser dinâmico demais). Implementar o **opt-in** do protegido e uma mensagem de teste com resposta.
+### - [x] T9.2 — Canal WhatsApp oficial via Baileys (envio)
+**O que será feito:** criar uma **segunda sessão Baileys** dedicada ao número oficial do Combinado (5511917321422, WhatsApp Business). Essa sessão é usada **exclusivamente para enviar** mensagens de protocolo e alerta ao protegido — separada da sessão de captura (que monitora o WhatsApp do protegido). Implementar: (1) `OfficialSession` — gerência da conexão Baileys do número oficial com authState próprio, reconexão automática e health check; (2) `WhatsAppChannel` — implementação do `ChannelDispatcher` que envia mensagem via essa sessão; (3) delays naturais entre envios (2–5s aleatório) para comportamento humanizado.
 
-**Como garantir que foi feito corretamente:** o número oficial envia o template aprovado a um contato que deu opt-in, e a entrega é confirmada.
+**Como garantir que foi feito corretamente:** (1) `OfficialSession` conecta, reconecta e reporta health; (2) `WhatsAppChannel.send()` envia uma mensagem de texto a um JID de teste e retorna `{ sent: true }`; (3) testes unitários do canal passam sem socket real (mock do sock.sendMessage); (4) o `ChannelDispatcher` roteia `'whatsapp'` para o `WhatsAppChannel` real em vez do mock.
 
-**Notas úteis:** a **captura** é Baileys (não-oficial); a **comunicação** com o idoso é a Cloud API **oficial** — essa separação protege a conta do protegido. Templates muito dinâmicos são rejeitados pela Meta como spam; mantenha o texto dentro do padrão utilitário aprovado.
+**Notas úteis:** a Cloud API da Meta ficou bloqueada (verificação de número não funciona). Para o MVP com volume mínimo (2 famílias, ~10 msgs), Baileys é viável e gratuito. **Sem** biblioteca anti-ban — o volume é baixo demais para precisar. Os delays naturais (2–5s) são suficientes. A separação de sessões continua: sessão 1 (captura do protegido) ≠ sessão 2 (envio pelo oficial). Cada uma tem seu próprio keys dir.
 
 ---
 
 ### - [ ] T9.3 — Enviar o protocolo ao protegido
-**O que será feito:** ligar o degrau "protocolo ao idoso" da escada ao envio real via WhatsApp Business. Monitorar o status de entrega (pelo webhook) e ter **fallback** se o template falhar.
+**O que será feito:** ligar o degrau "protocolo ao idoso" da escada ao envio real via a sessão Baileys oficial (T9.2). A mensagem de protocolo é texto simples com a orientação de pedir a senha combinada. Monitorar o ack do WhatsApp (message sent callback do Baileys) e ter **fallback** para o próximo degrau da escada se o envio falhar.
 
-**Como garantir que foi feito corretamente:** um incidente entrega a mensagem de protocolo ao número de teste do "idoso".
+**Como garantir que foi feito corretamente:** um incidente entrega a mensagem de protocolo ao número de teste do "idoso" via a sessão oficial Baileys.
 
-**Notas úteis:** a mensagem de protocolo é o gatilho dos Implementation Intentions ("recebeu isso → peça a senha"). Precisa chegar de um número que o idoso **já reconhece** (salvo na cerimônia de canal, F10/T10.1).
+**Notas úteis:** a mensagem de protocolo é o gatilho dos Implementation Intentions ("recebeu isso → peça a senha"). Precisa chegar de um número que o idoso **já reconhece** (salvo na cerimônia de canal, F10/T10.1). Sem templates da Meta — Baileys envia texto livre, o que na verdade simplifica o fluxo.
 
 ---
 
