@@ -61,10 +61,22 @@ export interface PairDeviceCommand {
   family_id: string
 }
 
+export interface SetupFamilyCommand {
+  type: 'setup_family'
+  family_name: string
+  guardian_name: string
+  guardian_phone: string
+  protected_name: string
+  protected_phone: string
+  code_word: string
+  code_hint?: string
+}
+
 export type Command =
   | StartSimulationCommand
   | AcknowledgeIncidentCommand
   | PairDeviceCommand
+  | SetupFamilyCommand
 
 // ---------------------------------------------------------------------------
 // Eventos de risco — sinais emitidos pelo Risk Worker (risk_queue)

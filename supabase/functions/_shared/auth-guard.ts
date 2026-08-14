@@ -5,6 +5,10 @@ export interface AuthResult {
   familyId: string;
 }
 
+export interface AuthUserResult {
+  userId: string;
+}
+
 export async function authGuard(req: Request): Promise<AuthResult> {
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) {
@@ -33,6 +37,26 @@ export async function authGuard(req: Request): Promise<AuthResult> {
   }
 
   return { guardianId: guardian.id, familyId: guardian.family_id };
+}
+
+export async function authUser(req: Request): Promise<AuthUserResult> {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) {
+    throw new HttpError(401, "Missing Authorization header");
+  }
+
+  const supabase = getSupabaseClient(authHeader);
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    throw new HttpError(401, "Invalid or expired token");
+  }
+
+  return { userId: user.id };
 }
 
 export class HttpError extends Error {

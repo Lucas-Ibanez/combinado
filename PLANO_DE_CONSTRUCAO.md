@@ -892,7 +892,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T10.1 — Onboarding completo do círculo
+### - [x] T10.1 — Onboarding completo do círculo
 **O que será feito:** encadear o fluxo inteiro: criar família → adicionar protegido → definir a **palavra-código** (fixa, com guia de boas práticas) → **pareamento** do Baileys presencial → **cerimônia do canal** (salvar o número oficial no WhatsApp do idoso + opt-in + mensagem de teste) → **teste de notificação** do próprio guardião → **1ª simulação**.
 
 **Como garantir que foi feito corretamente:** uma família nova completa todos os passos e termina "protegida de verdade" — com os canais verificados (o push do guardião testado e o número oficial reconhecido pelo idoso).

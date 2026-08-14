@@ -11,6 +11,7 @@ import SettingsPage from '@/pages/SettingsPage'
 import LoginPage from '@/pages/LoginPage'
 import MfaEnrollPage from '@/pages/MfaEnrollPage'
 import MfaVerifyPage from '@/pages/MfaVerifyPage'
+import OnboardingPage from '@/pages/OnboardingPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/mfa/enroll" element={<MfaEnrollPage />} />
           <Route path="/mfa/verify" element={<MfaVerifyPage />} />
           <Route element={<ProtectedRoute />}>
+            <Route path="onboarding" element={<OnboardingPage />} />
             <Route element={<AppLayout />}>
               <Route index element={<DashboardPage />} />
               <Route path="alerts" element={<IncidentsPage />} />
