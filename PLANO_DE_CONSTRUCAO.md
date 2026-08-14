@@ -849,7 +849,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T9.3 — Enviar o protocolo ao protegido
+### - [x] T9.3 — Enviar o protocolo ao protegido
 **O que será feito:** ligar o degrau "protocolo ao idoso" da escada ao envio real via a sessão Baileys oficial (T9.2). A mensagem de protocolo é texto simples com a orientação de pedir a senha combinada. Monitorar o ack do WhatsApp (message sent callback do Baileys) e ter **fallback** para o próximo degrau da escada se o envio falhar.
 
 **Como garantir que foi feito corretamente:** um incidente entrega a mensagem de protocolo ao número de teste do "idoso" via a sessão oficial Baileys.

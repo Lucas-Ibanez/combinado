@@ -24,8 +24,9 @@ import { startGateway } from './gateway/index.js'
 import { startRisk } from './risk/index.js'
 import { startOrchestrator } from './orchestrator/index.js'
 import { startHttpServer } from './http/index.js'
-import { startOfficialSession, WhatsAppChannel } from './orchestrator/channels/index.js'
+import { startOfficialSession, WhatsAppChannel, ProtocolSender } from './orchestrator/channels/index.js'
 import { registerChannel } from './orchestrator/ladder/dispatch.js'
+import { registerProtocolSender } from './orchestrator/ladder/index.js'
 
 const log = createLogger('bootstrap')
 
@@ -49,7 +50,11 @@ async function main() {
   registerChannel('whatsapp', (target, incidentId, channelLog) =>
     whatsappChannel.send(target, incidentId, channelLog),
   )
-  log.info('canal whatsapp registrado', { health: officialSession.health() })
+  const protocolSender = new ProtocolSender(officialSession)
+  registerProtocolSender((phone, name, incidentId, protocolLog) =>
+    protocolSender.sendProtocol(phone, name, incidentId, protocolLog),
+  )
+  log.info('canal whatsapp + protocolo registrados', { health: officialSession.health() })
 
   // Ordem: consumidores primeiro, produtor depois.
   const orchestrator = await startOrchestrator(createLogger('orchestrator'))

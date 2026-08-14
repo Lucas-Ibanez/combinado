@@ -1,3 +1,5 @@
 export { startOfficialSession } from './official-session.js'
 export type { OfficialSessionHandle, OfficialSessionHealth } from './official-session.js'
 export { WhatsAppChannel } from './whatsapp.js'
+export { ProtocolSender } from './protocol.js'
+export type { ProtocolResult } from './protocol.js'

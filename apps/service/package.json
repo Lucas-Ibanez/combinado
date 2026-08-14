@@ -26,7 +26,8 @@
     "test:delivery-telemetry": "tsx tests/delivery-telemetry.smoke.ts",
     "test:lifecycle": "tsx tests/lifecycle.smoke.ts",
     "test:webhook": "tsx tests/webhook-server.smoke.ts",
-    "test:wa-channel": "tsx tests/whatsapp-channel.smoke.ts"
+    "test:wa-channel": "tsx tests/whatsapp-channel.smoke.ts",
+    "test:protocol": "tsx tests/protocol-sender.smoke.ts"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

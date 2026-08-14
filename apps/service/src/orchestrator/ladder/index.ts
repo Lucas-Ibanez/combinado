@@ -3,6 +3,20 @@ import type { Logger } from '../../shared/logging/index.js'
 import { db } from '../../shared/db/index.js'
 import { dispatcher } from './dispatch.js'
 import { recordDispatchFailure } from './telemetry.js'
+import type { ProtocolResult } from '../channels/index.js'
+
+export type ProtocolSendFn = (
+  protectedPhone: string,
+  protectedName: string,
+  incidentId: string,
+  log: Logger,
+) => Promise<ProtocolResult>
+
+let protocolSendFn: ProtocolSendFn | null = null
+
+export function registerProtocolSender(fn: ProtocolSendFn): void {
+  protocolSendFn = fn
+}
 
 // ── Definição da escada ─────────────────────────────────────────────────────
 // Cada degrau tem canal, alvo (primário ou secundário) e tempo de escalação
@@ -95,6 +109,11 @@ export async function startLadder(
     return
   }
 
+  // Enviar protocolo ao protegido antes de alertar os guardiões.
+  // O protocolo é fire-and-forget: se falhar, a escada continua —
+  // o fallback é o guardião ligar e orientar pessoalmente.
+  await sendProtocolToProtected(incidentId, protectedPersonId, log)
+
   await createStep(incidentId, 0, guardians, severity, log)
 
   await db
@@ -107,6 +126,50 @@ export async function startLadder(
     severity,
     first_channel: LADDER[0]!.channel,
   })
+}
+
+async function sendProtocolToProtected(
+  incidentId: string,
+  protectedPersonId: string,
+  log: Logger,
+): Promise<void> {
+  if (!protocolSendFn) {
+    log.debug('ladder: protocol sender não registrado, pulando envio de protocolo')
+    return
+  }
+
+  const { data: person } = await db
+    .from('protected_persons')
+    .select('phone, display_name')
+    .eq('id', protectedPersonId)
+    .single()
+
+  if (!person?.phone) {
+    log.warn('ladder: protegido sem telefone, protocolo não enviado', {
+      incident_id: incidentId,
+      protected_person_id: protectedPersonId,
+    })
+    return
+  }
+
+  const result = await protocolSendFn(
+    person.phone,
+    person.display_name,
+    incidentId,
+    log,
+  )
+
+  if (result.sent) {
+    log.info('ladder: protocolo enviado ao protegido', {
+      incident_id: incidentId,
+      message_id: result.messageId ?? null,
+    })
+  } else {
+    log.warn('ladder: falha ao enviar protocolo ao protegido — escada continua', {
+      incident_id: incidentId,
+      error: result.error,
+    })
+  }
 }
 
 // ── Tick: verificar prazos expirados e avançar ──────────────────────────────
