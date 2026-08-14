@@ -22,8 +22,12 @@ const envSchema = z.object({
   VAPID_PUBLIC_KEY: z.string().min(1).optional(),
   VAPID_PRIVATE_KEY: z.string().min(1).optional(),
 
+  // Twilio — número de origem para ligações e SMS (T9.4)
+  TWILIO_PHONE_NUMBER: z.string().min(1).optional(),
+
   // Servidor HTTP para webhooks (T9.1)
   WEBHOOK_PORT: z.coerce.number().int().positive().default(3100),
+  WEBHOOK_BASE_URL: z.string().url().optional(),
   WHATSAPP_VERIFY_TOKEN: z.string().min(1).optional(),
   WHATSAPP_APP_SECRET: z.string().min(1).optional(),
 })

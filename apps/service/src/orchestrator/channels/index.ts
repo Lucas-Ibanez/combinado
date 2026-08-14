@@ -3,3 +3,4 @@ export type { OfficialSessionHandle, OfficialSessionHealth } from './official-se
 export { WhatsAppChannel } from './whatsapp.js'
 export { ProtocolSender } from './protocol.js'
 export type { ProtocolResult } from './protocol.js'
+export { CallChannel } from './call.js'

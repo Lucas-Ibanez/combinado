@@ -858,7 +858,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T9.4 — Twilio: ligação de intervenção
+### - [x] T9.4 — Twilio: ligação de intervenção
 **O que será feito:** disparar a ligação em alto risco com: mensagem **imediata** ao atender, número previamente salvo, identificação repetida, **sem AMD síncrono** (a detecção de secretária eletrônica insere silêncio que faz o idoso desligar), e opção "pressione 1 para ligar para seu familiar". **Nunca** pede senha/Pix/código. Webhooks de progresso (iniciada/tocou/atendida/terminou).
 
 **Como garantir que foi feito corretamente:** em alto risco, a ligação toca e reproduz a mensagem **sem atraso** ao ser atendida.
