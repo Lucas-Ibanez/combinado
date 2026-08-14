@@ -30,7 +30,8 @@
     "test:protocol": "tsx tests/protocol-sender.smoke.ts",
     "test:call": "tsx tests/call-channel.smoke.ts",
     "test:push": "tsx tests/push-channel.smoke.ts",
-    "test:sms": "tsx tests/sms-channel.smoke.ts"
+    "test:sms": "tsx tests/sms-channel.smoke.ts",
+    "test:guard": "tsx tests/channel-guard.smoke.ts"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

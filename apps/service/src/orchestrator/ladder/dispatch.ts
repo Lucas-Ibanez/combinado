@@ -1,5 +1,6 @@
 import type { DeliveryChannel } from '@combinado/shared'
 import type { Logger } from '../../shared/logging/index.js'
+import { guardChannel, _resetGuardsForTest as resetGuards } from './channel-guard.js'
 
 export interface DispatchTarget {
   guardian_id: string
@@ -41,7 +42,7 @@ function mockSend(channel: DeliveryChannel): ChannelSendFn {
 }
 
 export function registerChannel(channel: DeliveryChannel, handler: ChannelSendFn): void {
-  channelHandlers.set(channel, handler)
+  channelHandlers.set(channel, guardChannel(channel, handler))
 }
 
 export const dispatcher: ChannelDispatcher = {
@@ -60,4 +61,5 @@ export function _setDispatcherForTest(d: ChannelDispatcher): void {
 
 export function _resetDispatcherForTest(): void {
   channelHandlers.clear()
+  resetGuards()
 }

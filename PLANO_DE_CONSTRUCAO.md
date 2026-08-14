@@ -876,7 +876,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T9.6 — Rate limit e circuit breaker por canal
+### - [x] T9.6 — Rate limit e circuit breaker por canal
 **O que será feito:** cada canal ganha limite próprio e um disjuntor: se um provedor falhar em série, o sistema **para de martelar** aquele canal e segue a escada, sem derrubar o resto.
 
 **Como garantir que foi feito corretamente:** simular a falha de um canal (ex.: Twilio fora) **não** trava os outros — a escada segue pelos canais restantes.
