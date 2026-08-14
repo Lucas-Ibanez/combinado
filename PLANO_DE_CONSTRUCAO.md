@@ -867,7 +867,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T9.5 — Push (Web Push) + SMS ao guardião
+### - [x] T9.5 — Push (Web Push) + SMS ao guardião
 **O que será feito:** implementar os degraus de alerta ao guardião: Web Push (biblioteca `web-push` com as chaves VAPID, integrando com o service worker do app) e SMS de fallback (Twilio). Registrar entrega/ack como nos demais canais.
 
 **Como garantir que foi feito corretamente:** o guardião recebe o push e, na ausência de confirmação, recebe o SMS.

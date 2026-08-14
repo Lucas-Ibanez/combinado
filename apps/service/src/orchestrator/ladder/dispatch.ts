@@ -4,6 +4,7 @@ import type { Logger } from '../../shared/logging/index.js'
 export interface DispatchTarget {
   guardian_id: string
   phone?: string | null
+  push_subscription?: unknown | null
 }
 
 export interface DispatchResult {

@@ -50,6 +50,7 @@ export function primaryStepCount(): number {
 interface GuardianInfo {
   guardian_id: string
   phone: string | null
+  push_subscription: unknown | null
 }
 
 interface GuardianSet {
@@ -73,12 +74,16 @@ async function findGuardians(
   for (const link of data) {
     const { data: guardian } = await db
       .from('guardians')
-      .select('id, phone')
+      .select('id, phone, push_subscription')
       .eq('id', link.guardian_id)
       .single()
 
     if (guardian) {
-      const info: GuardianInfo = { guardian_id: guardian.id, phone: guardian.phone ?? null }
+      const info: GuardianInfo = {
+        guardian_id: guardian.id,
+        phone: guardian.phone ?? null,
+        push_subscription: guardian.push_subscription ?? null,
+      }
       if (link.role === 'primary') result.primary = info
       else if (link.role === 'secondary') result.secondary = info
     }
@@ -285,7 +290,7 @@ async function createStep(
 
   const result = await dispatcher.send(
     stepDef.def.channel,
-    { guardian_id: guardian.guardian_id, phone: guardian.phone },
+    { guardian_id: guardian.guardian_id, phone: guardian.phone, push_subscription: guardian.push_subscription },
     incidentId,
     log,
   )
