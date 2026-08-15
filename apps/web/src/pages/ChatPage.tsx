@@ -1,21 +1,188 @@
-export default function ChatPage() {
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { useCheckMessage, type CheckMessageResult } from '@/features/chat'
+
+const SIGNAL_LABELS: Record<string, string> = {
+  pix_mention: 'Pix / dinheiro / transferência',
+  urgency_language: 'Linguagem de urgência',
+  impersonation_pattern: 'Menção a relação familiar',
+  secrecy_demand: 'Pedido de sigilo',
+  device_excuse: 'Troca de aparelho / número',
+  link_suspicious: 'Link encurtado suspeito',
+  voice_note: 'Mensagem de áudio',
+  unknown_sender: 'Remetente desconhecido',
+  forwarded: 'Mensagem encaminhada',
+}
+
+function RiskBadge({ level }: { level: string }) {
+  if (level === 'dangerous') {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1 rounded-full bg-danger-surface text-danger-dark">
+        Alto Risco
+      </span>
+    )
+  }
+  if (level === 'suspicious') {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1 rounded-full bg-warning-surface text-warning-dark">
+        Suspeito
+      </span>
+    )
+  }
   return (
-    <div className="p-6 flex flex-col items-center justify-center min-h-[60vh] text-center">
-      <div className="w-12 h-12 rounded-full bg-brand-surface flex items-center justify-center mb-4">
-        <span className="text-brand text-xl">💬</span>
+    <span className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1 rounded-full bg-success-surface text-success-dark">
+      Sem padrões de golpe
+    </span>
+  )
+}
+
+function ResultCard({ result }: { result: CheckMessageResult }) {
+  const activeSignals = Object.entries(result.signals)
+    .filter(([, v]) => v)
+    .map(([k]) => ({ key: k, label: SIGNAL_LABELS[k] ?? k }))
+
+  return (
+    <Card className={
+      result.risk_level === 'dangerous'
+        ? 'border-danger border-2'
+        : result.risk_level === 'suspicious'
+          ? 'border-warning border-2'
+          : 'border-success border-2'
+    }>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base">Resultado da Verificação</CardTitle>
+          <RiskBadge level={result.risk_level} />
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {activeSignals.length > 0 && (
+          <div>
+            <p className="text-xs font-medium text-text-muted mb-2">Sinais detectados:</p>
+            <div className="flex flex-wrap gap-1.5">
+              {activeSignals.map((s) => (
+                <span
+                  key={s.key}
+                  className="text-xs px-2 py-1 rounded-md bg-surface border border-border text-text"
+                >
+                  {s.label}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="bg-surface rounded-lg p-3">
+          <p className="text-sm text-text whitespace-pre-line">{result.advice}</p>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+export default function ChatPage() {
+  const [text, setText] = useState('')
+  const [result, setResult] = useState<CheckMessageResult | null>(null)
+  const checkMutation = useCheckMessage()
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!text.trim()) return
+    setResult(null)
+    checkMutation.mutate(text.trim(), {
+      onSuccess: (data) => setResult(data),
+    })
+  }
+
+  function handleClear() {
+    setText('')
+    setResult(null)
+    checkMutation.reset()
+  }
+
+  return (
+    <div className="p-6 space-y-6 max-w-lg mx-auto">
+      <div>
+        <h1 className="text-xl font-bold text-text">Chat de Verificação</h1>
+        <p className="text-sm text-text-muted mt-1">
+          Cole aqui uma mensagem suspeita para verificar se é golpe
+        </p>
       </div>
-      <h1 className="text-xl font-bold text-text mb-2">Chat de Verificação</h1>
-      <p className="text-text-muted text-sm max-w-xs mb-6">
-        Use este canal seguro para confirmar a identidade de quem entrou em contato com sua família.
-      </p>
-      <button
-        type="button"
-        disabled
-        className="bg-brand text-brand-foreground font-medium text-sm py-2.5 px-6 rounded-lg opacity-50 cursor-not-allowed"
-      >
-        Iniciar verificação
-      </button>
-      <p className="text-xs text-text-muted mt-2">Disponível em breve</p>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Como usar</CardTitle>
+          <CardDescription>Dois canais disponíveis:</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <div className="flex gap-2 items-start">
+            <span className="text-sm shrink-0">1.</span>
+            <p className="text-sm text-text-muted">
+              <strong>WhatsApp:</strong> Encaminhe a mensagem suspeita para o número
+              do Combinado (+55 11 91732-1422) e receba a avaliação direto no chat.
+            </p>
+          </div>
+          <div className="flex gap-2 items-start">
+            <span className="text-sm shrink-0">2.</span>
+            <p className="text-sm text-text-muted">
+              <strong>Aqui no app:</strong> Cole o texto da mensagem abaixo para uma análise completa.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <div>
+          <label htmlFor="check-text" className="text-sm font-medium text-text block mb-1.5">
+            Mensagem para verificar
+          </label>
+          <textarea
+            id="check-text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Cole aqui a mensagem que recebeu..."
+            rows={5}
+            maxLength={5000}
+            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand resize-none"
+          />
+          <p className="text-xs text-text-muted mt-1 text-right">
+            {text.length} / 5000
+          </p>
+        </div>
+
+        <div className="flex gap-2">
+          <Button
+            type="submit"
+            className="flex-1"
+            disabled={!text.trim() || checkMutation.isPending}
+          >
+            {checkMutation.isPending ? 'Analisando...' : 'Verificar Mensagem'}
+          </Button>
+          {(result || text) && (
+            <Button type="button" variant="outline" onClick={handleClear}>
+              Limpar
+            </Button>
+          )}
+        </div>
+      </form>
+
+      {checkMutation.error && (
+        <p className="text-sm text-danger text-center">
+          {checkMutation.error.message}
+        </p>
+      )}
+
+      {result && <ResultCard result={result} />}
+
+      <Card className="bg-surface">
+        <CardContent className="pt-4 pb-4">
+          <p className="text-xs text-text-muted text-center">
+            O Combinado analisa padrões de texto em português brasileiro. Nenhuma ferramenta
+            é infalível — na dúvida, <strong>peça a senha combinada</strong> mesmo assim.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   )
 }

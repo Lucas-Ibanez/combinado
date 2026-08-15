@@ -910,7 +910,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T10.3 — Chat de verificação (WhatsApp + in-app)
+### - [x] T10.3 — Chat de verificação (WhatsApp + in-app)
 **O que será feito:** canal para checar mensagens suspeitas sob demanda. Primário no **WhatsApp** (qualquer um encaminha ao número oficial e recebe uma avaliação); secundário **in-app** com mais contexto. Aplicar a **regra de honestidade**: nunca dar falsa segurança — no ambíguo, orientar a pedir a senha mesmo assim.
 
 **Como garantir que foi feito corretamente:** encaminhar uma mensagem retorna uma avaliação honesta de risco (e, no caso ambíguo, a orientação de pedir a senha).

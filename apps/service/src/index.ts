@@ -29,6 +29,7 @@ import { registerChannel } from './orchestrator/ladder/dispatch.js'
 import { registerProtocolSender } from './orchestrator/ladder/index.js'
 import { startSimulationWorker } from './simulation/index.js'
 import { attachSimulationResponseHandler } from './simulation/response-handler.js'
+import { attachVerificationHandler } from './verification/index.js'
 
 const log = createLogger('bootstrap')
 
@@ -74,6 +75,7 @@ async function main() {
   const orchestrator = await startOrchestrator(createLogger('orchestrator'))
   const simulationWorker = await startSimulationWorker(officialSession, createLogger('simulation'))
   attachSimulationResponseHandler(officialSession, createLogger('simulation-response'))
+  attachVerificationHandler(officialSession, createLogger('verification'))
   const risk = await startRisk(createLogger('risk'))
   const gateway = await startGateway(createLogger('gateway'))
   const http = startHttpServer(createLogger('http'))
