@@ -75,7 +75,7 @@ export default function IncidentDetailPage() {
   const handleAcknowledge = (action: string) => {
     if (ackMutation.isPending) return
     ackMutation.mutate(
-      { incidentId: incident.id },
+      { incidentId: incident.id, ackAction: action },
       {
         onSuccess: () => {
           if (action === 'escalate') return

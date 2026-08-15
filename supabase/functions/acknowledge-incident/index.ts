@@ -17,6 +17,7 @@ Deno.serve(async (req) => {
     // 2. Ler body
     const body = await req.json();
     const incidentId = body.incident_id;
+    const ackAction = body.ack_action ?? "safe_confirmed";
     if (!incidentId) {
       throw new HttpError(400, "Missing incident_id");
     }
@@ -30,6 +31,7 @@ Deno.serve(async (req) => {
         p_incident_id: incidentId,
         p_guardian_id: guardianId,
         p_family_id: familyId,
+        p_ack_channel: "app",
       },
     );
 
@@ -48,6 +50,8 @@ Deno.serve(async (req) => {
         ok: true,
         incident_id: incidentId,
         status: data,
+        ack_action: ackAction,
+        ack_channel: "app",
       }),
       {
         status: 200,

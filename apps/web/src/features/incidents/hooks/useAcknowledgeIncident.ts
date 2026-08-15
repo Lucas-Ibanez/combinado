@@ -3,16 +3,17 @@ import { supabase } from '@/lib/supabase'
 
 interface AckParams {
   incidentId: string
+  ackAction?: string
 }
 
 export function useAcknowledgeIncident() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ incidentId }: AckParams) => {
+    mutationFn: async ({ incidentId, ackAction = 'safe_confirmed' }: AckParams) => {
       const { data, error } = await supabase.functions.invoke(
         'acknowledge-incident',
-        { body: { incident_id: incidentId } },
+        { body: { incident_id: incidentId, ack_action: ackAction } },
       )
 
       if (error) throw error

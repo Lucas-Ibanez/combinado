@@ -1,5 +1,5 @@
 import type { IncidentDelivery, Severity } from '@combinado/shared'
-import { Phone, ShieldAlert, UserPlus, MessageCircleWarning } from 'lucide-react'
+import { Phone, ShieldAlert, UserPlus, MessageCircleWarning, PhoneCall } from 'lucide-react'
 
 interface CrisisViewProps {
   personName: string
@@ -99,13 +99,16 @@ export default function CrisisView({
           </div>
         )}
 
-        {totalSteps > 0 && (
-          <p className="text-xs text-text-muted text-center">
-            Escada de alerta em andamento ({currentStep} de {totalSteps} canais ativos)
+        <div className="rounded-xl bg-surface border border-brand/20 p-4">
+          <h2 className="text-sm font-semibold text-text mb-2 flex items-center gap-1.5">
+            <PhoneCall className="w-4 h-4 text-brand" />
+            Verifique por telefone primeiro
+          </h2>
+          <p className="text-xs text-text-muted mb-3">
+            Ligue diretamente para {personName} — nao confirme pelo WhatsApp, que pode estar comprometido.
+            Use a senha combinada durante a ligacao para garantir que esta falando com a pessoa certa.
           </p>
-        )}
 
-        <div className="space-y-3">
           <a
             href={personPhone ? `tel:${personPhone}` : undefined}
             onClick={(e) => {
@@ -120,6 +123,18 @@ export default function CrisisView({
             <Phone className="w-5 h-5" />
             Ligar para {personName}
           </a>
+        </div>
+
+        {totalSteps > 0 && (
+          <p className="text-xs text-text-muted text-center">
+            Escada de alerta em andamento ({currentStep} de {totalSteps} canais ativos)
+          </p>
+        )}
+
+        <div className="space-y-3">
+          <p className="text-xs font-medium text-text">
+            Apos falar com {personName}, confirme o resultado:
+          </p>
 
           {ackError && (
             <p className="text-sm text-danger text-center">{ackError}</p>
@@ -133,7 +148,7 @@ export default function CrisisView({
               className="flex items-center gap-3 w-full rounded-xl border-2 border-brand bg-surface py-3.5 px-4 text-sm font-semibold text-brand transition-colors active:bg-brand-surface disabled:opacity-50"
             >
               <MessageCircleWarning className="w-5 h-5 shrink-0" />
-              {isPending ? 'Confirmando...' : 'Fui eu quem pediu — está tudo bem'}
+              {isPending ? 'Confirmando...' : 'Liguei e confirmei — esta tudo bem'}
             </button>
 
             <button
@@ -143,7 +158,7 @@ export default function CrisisView({
               className="flex items-center gap-3 w-full rounded-xl border-2 border-danger bg-surface py-3.5 px-4 text-sm font-semibold text-danger transition-colors active:bg-danger-surface disabled:opacity-50"
             >
               <ShieldAlert className="w-5 h-5 shrink-0" />
-              {isPending ? 'Confirmando...' : 'Não reconheço este pedido'}
+              {isPending ? 'Confirmando...' : 'Nao reconheco este pedido'}
             </button>
 
             <button
@@ -153,9 +168,13 @@ export default function CrisisView({
               className="flex items-center gap-3 w-full rounded-xl border-2 border-attention bg-surface py-3.5 px-4 text-sm font-semibold text-attention transition-colors active:bg-attention-surface disabled:opacity-50"
             >
               <UserPlus className="w-5 h-5 shrink-0" />
-              {isPending ? 'Confirmando...' : 'Chamar outro guardião'}
+              {isPending ? 'Confirmando...' : 'Chamar outro guardiao'}
             </button>
           </div>
+
+          <p className="text-xs text-text-muted text-center">
+            Ao confirmar, {personName} recebera uma notificacao por SMS ou ligacao (canal independente do WhatsApp).
+          </p>
         </div>
       </div>
     </div>

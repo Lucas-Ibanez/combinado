@@ -1,6 +1,7 @@
 import type { Logger } from '../shared/logging/index.js'
 import { orchestratorDb as db } from '../shared/db/roles.js'
 import { recordAcknowledgment } from './ladder/telemetry.js'
+import { sendPostAckConfirmation } from './post-ack.js'
 
 const ACKABLE_STATUSES = ['notifying', 'escalated'] as const
 
@@ -13,6 +14,7 @@ export async function acknowledgeIncident(
   incidentId: string,
   guardianId: string,
   log: Logger,
+  ackAction: string = 'safe_confirmed',
 ): Promise<AckResult> {
   const { data: incident, error: findErr } = await db
     .from('incidents')
@@ -78,6 +80,17 @@ export async function acknowledgeIncident(
     incident_id: incidentId,
     guardian_id: guardianId,
     delivery_acked: activeDelivery?.id ?? null,
+    ack_action: ackAction,
+  })
+
+  // Confirmação fora do canal comprometido: envia resultado ao protegido
+  // via SMS/ligação (canais independentes do WhatsApp suspeito).
+  // Fire-and-forget: falha aqui não invalida o ack já gravado.
+  sendPostAckConfirmation(incidentId, guardianId, ackAction, log).catch((err) => {
+    log.error('post-ack: falha ao enviar confirmação ao protegido', {
+      incident_id: incidentId,
+      error: (err as Error).message,
+    })
   })
 
   return { success: true }

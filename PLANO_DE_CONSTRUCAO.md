@@ -979,7 +979,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T11.5 — Confirmação fora do canal comprometido
+### - [x] T11.5 — Confirmação fora do canal comprometido
 **O que será feito:** assegurar que a verificação final **não** ocorre só no mesmo WhatsApp possivelmente comprometido: o guardião confirma no app (canal independente) e o idoso recebe a confirmação por contato/ligação previamente conhecidos. A palavra-código opera **dentro** dessa confirmação out-of-band, não no lugar dela.
 
 **Como garantir que foi feito corretamente:** o caminho de confirmação usa um canal **distinto** do canal da suspeita.
