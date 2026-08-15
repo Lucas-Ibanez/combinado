@@ -919,7 +919,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T10.4 — Painel do protegido (contra abuso do guardião)
+### - [x] T10.4 — Painel do protegido (contra abuso do guardião)
 **O que será feito:** superfície onde o idoso vê **quem são os guardiões**, **revoga acesso**, consulta as intervenções feitas e pede ajuda independente. Adicionar novo guardião **exige confirmação do idoso**.
 
 **Como garantir que foi feito corretamente:** o protegido consegue ver e **revogar** um guardião.

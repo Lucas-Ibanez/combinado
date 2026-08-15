@@ -312,6 +312,7 @@ export type Database = {
           family_id: string
           id: string
           opted_in: boolean
+          panel_token: string
           phone: string | null
           updated_at: string
         }
@@ -323,6 +324,7 @@ export type Database = {
           family_id: string
           id?: string
           opted_in?: boolean
+          panel_token?: string
           phone?: string | null
           updated_at?: string
         }
@@ -334,6 +336,7 @@ export type Database = {
           family_id?: string
           id?: string
           opted_in?: boolean
+          panel_token?: string
           phone?: string | null
           updated_at?: string
         }
@@ -571,6 +574,19 @@ export type Database = {
         Args: { message: Json; queue_name: string }
         Returns: number
       }
+      setup_family_tx: {
+        Args: {
+          p_code_hint: string
+          p_code_word: string
+          p_guardian_id: string
+          p_guardian_name: string
+          p_guardian_phone: string
+          p_protected_name: string
+          p_protected_phone: string
+          p_family_name: string
+        }
+        Returns: Json
+      }
       start_simulation_tx: {
         Args: {
           p_family_id: string
@@ -579,6 +595,19 @@ export type Database = {
           p_protected_person_id: string
         }
         Returns: string
+      }
+      get_protected_panel: {
+        Args: {
+          p_panel_token: string
+        }
+        Returns: Json
+      }
+      revoke_guardian_tx: {
+        Args: {
+          p_panel_token: string
+          p_guardian_link_id: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

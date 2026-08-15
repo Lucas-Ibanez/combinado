@@ -15,7 +15,11 @@ import {
   Phone,
   Bell,
   User,
+  ExternalLink,
+  Copy,
+  Check,
 } from 'lucide-react'
+import { useState } from 'react'
 
 const STATUS_CONFIG: Record<
   BaileysStatus,
@@ -26,6 +30,52 @@ const STATUS_CONFIG: Record<
   pairing: { label: 'Pareando...', color: 'text-attention', icon: Loader2, urgent: false },
   disconnected: { label: 'Desconectado', color: 'text-danger', icon: WifiOff, urgent: true },
   unpaired: { label: 'Não vinculado', color: 'text-text-muted', icon: WifiOff, urgent: false },
+}
+
+function PanelLinkButton({ token, name }: { token: string; name: string }) {
+  const [copied, setCopied] = useState(false)
+  const panelUrl = `${window.location.origin}/protected?token=${token}`
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(panelUrl)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // fallback
+    }
+  }
+
+  return (
+    <div className="mt-3 rounded-lg bg-brand-surface px-3 py-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 text-xs text-brand">
+          <ExternalLink className="w-3.5 h-3.5" />
+          <span className="font-medium">Painel do Protegido</span>
+        </div>
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="flex items-center gap-1 text-xs text-brand hover:text-brand/80 transition-colors"
+        >
+          {copied ? (
+            <>
+              <Check className="w-3.5 h-3.5" />
+              Copiado
+            </>
+          ) : (
+            <>
+              <Copy className="w-3.5 h-3.5" />
+              Copiar link
+            </>
+          )}
+        </button>
+      </div>
+      <p className="text-xs text-text-muted mt-1">
+        Envie este link para {name} — permite ver guardiões e revogar acesso de forma independente.
+      </p>
+    </div>
+  )
 }
 
 function SessionCard({ person }: { person: ProtectedPersonStatus }) {
@@ -81,6 +131,10 @@ function SessionCard({ person }: { person: ProtectedPersonStatus }) {
           )}
         </span>
       </div>
+
+      {person.panel_token && (
+        <PanelLinkButton token={person.panel_token} name={person.display_name} />
+      )}
     </div>
   )
 }

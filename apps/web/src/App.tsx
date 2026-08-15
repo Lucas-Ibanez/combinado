@@ -13,6 +13,7 @@ import MfaEnrollPage from '@/pages/MfaEnrollPage'
 import MfaVerifyPage from '@/pages/MfaVerifyPage'
 import OnboardingPage from '@/pages/OnboardingPage'
 import SimulationsPage from '@/pages/SimulationsPage'
+import ProtectedPanelPage from '@/pages/ProtectedPanelPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,6 +29,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
+          <Route path="/protected" element={<ProtectedPanelPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/mfa/enroll" element={<MfaEnrollPage />} />
           <Route path="/mfa/verify" element={<MfaVerifyPage />} />
