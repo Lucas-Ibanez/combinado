@@ -31,7 +31,9 @@
     "test:call": "tsx tests/call-channel.smoke.ts",
     "test:push": "tsx tests/push-channel.smoke.ts",
     "test:sms": "tsx tests/sms-channel.smoke.ts",
-    "test:guard": "tsx tests/channel-guard.smoke.ts"
+    "test:guard": "tsx tests/channel-guard.smoke.ts",
+    "test:envelope": "tsx tests/envelope.smoke.ts",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

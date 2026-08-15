@@ -1,9 +1,8 @@
 import path from 'node:path'
 import { useMultiFileAuthState } from '@whiskeysockets/baileys'
+import { config } from '../../shared/config/index.js'
+import { loadVaultAuthState } from './vaultAuthState.js'
 
-// authState em disco NA FASE DE DEV — pasta apps/service/keys, gitignored.
-// A criptografia real do estado (envelope encryption) entra em T11.1.
-// Cada protected_person tem seu próprio subdiretório para isolar sessões.
 const KEYS_ROOT = path.resolve(process.cwd(), 'keys')
 
 export function keysDirFor(protectedPersonId: string): string {
@@ -11,5 +10,15 @@ export function keysDirFor(protectedPersonId: string): string {
 }
 
 export async function loadAuthState(protectedPersonId: string) {
+  if (config.VAULT_MASTER_KEY) {
+    return loadVaultAuthState(protectedPersonId)
+  }
   return useMultiFileAuthState(keysDirFor(protectedPersonId))
+}
+
+export async function loadOfficialAuthState() {
+  if (config.VAULT_MASTER_KEY) {
+    return loadVaultAuthState('_official')
+  }
+  return useMultiFileAuthState(path.join(KEYS_ROOT, '_official'))
 }

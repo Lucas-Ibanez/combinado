@@ -25,6 +25,10 @@ const envSchema = z.object({
   // Twilio — número de origem para ligações e SMS (T9.4)
   TWILIO_PHONE_NUMBER: z.string().min(1).optional(),
 
+  // Vault — master key para envelope encryption das chaves do Baileys (T11.1)
+  // 64 hex chars = 32 bytes AES-256. Obrigatório em produção.
+  VAULT_MASTER_KEY: z.string().length(64).regex(/^[0-9a-fA-F]+$/).optional(),
+
   // Servidor HTTP para webhooks (T9.1)
   WEBHOOK_PORT: z.coerce.number().int().positive().default(3100),
   WEBHOOK_BASE_URL: z.string().url().optional(),

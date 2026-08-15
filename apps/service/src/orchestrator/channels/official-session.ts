@@ -1,13 +1,12 @@
-import path from 'node:path'
 import {
   makeWASocket,
   Browsers,
   DisconnectReason,
   fetchLatestBaileysVersion,
-  useMultiFileAuthState,
   type WASocket,
 } from '@whiskeysockets/baileys'
 import type { Logger } from '../../shared/logging/index.js'
+import { loadOfficialAuthState } from '../../gateway/baileys/authState.js'
 
 export type OfficialSessionHealth = 'connected' | 'reconnecting' | 'disconnected'
 
@@ -16,8 +15,6 @@ export interface OfficialSessionHandle {
   health(): OfficialSessionHealth
   socket(): WASocket | null
 }
-
-const KEYS_DIR = path.resolve(process.cwd(), 'keys', '_official')
 
 const RECONNECT_BASE_MS = [1_000, 3_000, 5_000, 10_000, 30_000]
 
@@ -48,7 +45,7 @@ export async function startOfficialSession(
   let currentHealth: OfficialSessionHealth = 'disconnected'
 
   async function connect(): Promise<void> {
-    const { state, saveCreds } = await useMultiFileAuthState(KEYS_DIR)
+    const { state, saveCreds } = await loadOfficialAuthState()
     const { version } = await fetchLatestBaileysVersion()
     const hasCreds = !!state.creds?.me
 

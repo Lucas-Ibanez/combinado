@@ -943,7 +943,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T11.1 — Envelope encryption das chaves do Baileys
+### - [x] T11.1 — Envelope encryption das chaves do Baileys
 **O que será feito:** substituir a persistência local de dev (`keys/`) por **envelope encryption** com chave por protegido, guardada via KMS, no schema isolado (`vault_baileys`), acessível só pela role do Gateway. Rotação e trilha de acesso.
 
 **Como garantir que foi feito corretamente:** as chaves **nunca** aparecem em claro — nem em log, nem no filesystem, nem fora do Gateway.
