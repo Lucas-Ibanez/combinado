@@ -53,6 +53,13 @@ export default function StepTestNotification({ onComplete, onSkip }: Props) {
 
       if (error) throw new Error('Erro ao salvar subscription: ' + error.message)
 
+      await registration.showNotification('Combinado — Teste', {
+        body: 'Notificações funcionando! Você receberá alertas quando algo suspeito for detectado.',
+        icon: '/icon-192.svg',
+        badge: '/icon-192.svg',
+        tag: 'test-notification',
+      })
+
       return subJson
     },
     onSuccess: () => {

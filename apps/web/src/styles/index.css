@@ -28,7 +28,7 @@
   --color-surface-muted: #F5F5F5;
   --color-border: #E5E5E5;
   --color-text: #171717;
-  --color-text-muted: #737373;
+  --color-text-muted: #6B6B6B;
   --color-text-inverted: #FFFFFF;
 
   /* ── Sucesso (feedback positivo, alinhado ao verde da marca) ── */
@@ -91,5 +91,18 @@
 @media (prefers-reduced-motion: reduce) {
   .emotional-mode {
     transition: none;
+  }
+}
+
+@layer base {
+  @media (pointer: coarse) {
+    button,
+    [role="button"],
+    [role="slider"],
+    a[href],
+    summary {
+      min-height: 44px;
+      min-width: 44px;
+    }
   }
 }
