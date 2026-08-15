@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { useSetupFamily } from '../hooks/useSetupFamily'
+import { CircleAlert } from 'lucide-react'
+import { SystemStateNotice } from '@/components/common/SystemStatus'
 
 interface Props {
   onComplete: (result: { protectedPersonId: string; protectedName: string }) => void
@@ -196,9 +198,13 @@ export default function StepCircleSetup({ onComplete }: Props) {
       </Card>
 
       {setupFamily.error && (
-        <p className="text-sm text-attention-dark text-center">
-          {setupFamily.error.message}
-        </p>
+        <SystemStateNotice
+          icon={CircleAlert}
+          title="Não foi possível criar o círculo"
+          description={setupFamily.error.message}
+          tone="attention"
+          live="assertive"
+        />
       )}
 
       <Button

@@ -1,6 +1,7 @@
 import type { IncidentDelivery, Severity } from '@combinado/shared'
-import { Phone, ShieldAlert, UserPlus, MessageCircleWarning, PhoneCall } from 'lucide-react'
+import { CircleAlert, Phone, ShieldAlert, UserPlus, MessageCircleWarning, PhoneCall } from 'lucide-react'
 import EmotionalModeFrame from '@/components/common/EmotionalModeFrame'
+import { SystemStateNotice } from '@/components/common/SystemStatus'
 
 interface CrisisViewProps {
   personName: string
@@ -95,8 +96,10 @@ export default function CrisisView({
             <ul className="space-y-1.5">
               {signals.map((s) => (
                 <li key={s} className="flex items-center gap-2 text-sm text-text">
-                  <span className="w-1.5 h-1.5 rounded-full bg-danger shrink-0" />
-                  {s}
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-danger/30 bg-danger-surface">
+                    <CircleAlert className="h-4 w-4 text-danger-dark" aria-hidden="true" />
+                  </span>
+                  <span>{s}</span>
                 </li>
               ))}
             </ul>
@@ -141,7 +144,13 @@ export default function CrisisView({
           </p>
 
           {ackError && (
-            <p className="text-sm text-danger text-center">{ackError}</p>
+            <SystemStateNotice
+              icon={CircleAlert}
+              title="Não foi possível registrar sua confirmação"
+              description={ackError}
+              tone="incident"
+              live="assertive"
+            />
           )}
 
           <div className="grid grid-cols-1 gap-2">

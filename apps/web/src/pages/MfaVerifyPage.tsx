@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import EmotionalModeFrame from '@/components/common/EmotionalModeFrame'
+import { CircleAlert } from 'lucide-react'
+import { SystemStateNotice } from '@/components/common/SystemStatus'
 
 export default function MfaVerifyPage() {
   const navigate = useNavigate()
@@ -88,9 +90,13 @@ export default function MfaVerifyPage() {
           </div>
 
           {error && (
-            <p className="text-sm text-attention-dark bg-attention-surface rounded-lg px-3 py-2">
-              {error}
-            </p>
+            <SystemStateNotice
+              icon={CircleAlert}
+              title="Código não confirmado"
+              description={error}
+              tone="attention"
+              live="assertive"
+            />
           )}
 
           <button

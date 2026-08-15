@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import EmotionalModeFrame from '@/components/common/EmotionalModeFrame'
+import { CircleAlert } from 'lucide-react'
+import { SystemStateNotice } from '@/components/common/SystemStatus'
 
 type Mode = 'login' | 'signup'
 
@@ -73,9 +75,11 @@ export default function LoginPage() {
           Proteção familiar contra golpes
         </p>
 
-        <div className="flex rounded-lg bg-surface-muted p-1 mb-6">
+        <div className="flex rounded-lg bg-surface-muted p-1 mb-6" role="tablist" aria-label="Tipo de acesso">
           <button
             type="button"
+            role="tab"
+            aria-selected={mode === 'login'}
             onClick={() => { setMode('login'); setError(null) }}
             className={`flex-1 text-sm font-medium py-2 rounded-md transition-colors ${
               mode === 'login'
@@ -87,6 +91,8 @@ export default function LoginPage() {
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={mode === 'signup'}
             onClick={() => { setMode('signup'); setError(null) }}
             className={`flex-1 text-sm font-medium py-2 rounded-md transition-colors ${
               mode === 'signup'
@@ -132,9 +138,13 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <p className="text-sm text-attention-dark bg-attention-surface rounded-lg px-3 py-2">
-              {error}
-            </p>
+            <SystemStateNotice
+              icon={CircleAlert}
+              title="Não foi possível continuar"
+              description={error}
+              tone="attention"
+              live="assertive"
+            />
           )}
 
           <button

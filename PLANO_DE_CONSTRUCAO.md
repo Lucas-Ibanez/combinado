@@ -1010,7 +1010,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T12.2 — Nunca só cor (WCAG)
+### - [x] T12.2 — Nunca só cor (WCAG)
 **O que será feito:** todo estado combina **texto + ícone + forma + cor + ação** ("proteção ativa" com ícone de confirmação; "desconectado" com plugue interrompido).
 
 **Como garantir que foi feito corretamente:** em tons de cinza (simulando daltonismo), ainda se distingue cada estado.

@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { CircleAlert } from 'lucide-react'
+import { SystemStateNotice } from '@/components/common/SystemStatus'
 
 interface StepUpDialogProps {
   open: boolean
@@ -26,8 +28,13 @@ export default function StepUpDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-surface rounded-2xl shadow-xl p-6 w-full max-w-sm">
-        <h2 className="text-lg font-bold text-text text-center mb-1">
+      <div
+        className="bg-surface rounded-2xl shadow-xl p-6 w-full max-w-sm"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="step-up-title"
+      >
+        <h2 id="step-up-title" className="text-lg font-bold text-text text-center mb-1">
           Confirme sua identidade
         </h2>
         <p className="text-text-muted text-center text-sm mb-5">
@@ -49,9 +56,13 @@ export default function StepUpDialog({
           />
 
           {error && (
-            <p className="text-sm text-attention-dark bg-attention-surface rounded-lg px-3 py-2">
-              {error}
-            </p>
+            <SystemStateNotice
+              icon={CircleAlert}
+              title="Código não confirmado"
+              description={error}
+              tone="attention"
+              live="assertive"
+            />
           )}
 
           <button

@@ -3,6 +3,8 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { supabase } from '@/lib/supabase'
+import { CheckCircle2, CircleAlert, Loader2, QrCode, Smartphone } from 'lucide-react'
+import { SystemStateNotice } from '@/components/common/SystemStatus'
 
 interface Props {
   protectedPersonId: string
@@ -49,7 +51,7 @@ export default function StepPairWhatsApp({ protectedPersonId, onComplete, onSkip
       <div className="space-y-6">
         <div className="text-center">
           <div className="w-14 h-14 rounded-full bg-success-surface flex items-center justify-center mx-auto mb-3">
-            <span className="text-2xl">✅</span>
+            <CheckCircle2 className="h-7 w-7 text-success-dark" aria-hidden="true" />
           </div>
           <h2 className="text-xl font-bold text-text">WhatsApp Pareado!</h2>
           <p className="text-sm text-text-muted mt-1">
@@ -67,7 +69,7 @@ export default function StepPairWhatsApp({ protectedPersonId, onComplete, onSkip
     <div className="space-y-6">
       <div className="text-center mb-2">
         <div className="w-14 h-14 rounded-full bg-brand-surface flex items-center justify-center mx-auto mb-3">
-          <span className="text-2xl">📱</span>
+          <Smartphone className="h-7 w-7 text-brand" aria-hidden="true" />
         </div>
         <h2 className="text-xl font-bold text-text">Parear WhatsApp</h2>
         <p className="text-sm text-text-muted mt-1">
@@ -115,7 +117,10 @@ export default function StepPairWhatsApp({ protectedPersonId, onComplete, onSkip
                 className="w-48 h-48"
               />
             </div>
-            <p className="text-xs text-text-muted mt-3">Aguardando conexão...</p>
+            <p className="mt-3 flex items-center gap-2 text-xs text-text-muted" role="status">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+              Aguardando conexão...
+            </p>
           </CardContent>
         </Card>
       )}
@@ -123,15 +128,24 @@ export default function StepPairWhatsApp({ protectedPersonId, onComplete, onSkip
       {pairingStarted && !qrCode && (
         <Card>
           <CardContent className="pt-6 text-center">
-            <p className="text-sm text-text-muted">Gerando QR Code...</p>
+            <p className="flex items-center justify-center gap-2 text-sm text-text-muted" role="status">
+              <QrCode className="h-4 w-4" aria-hidden="true" />
+              Gerando QR Code...
+            </p>
           </CardContent>
         </Card>
       )}
 
       {pairMutation.error && (
-        <p className="text-sm text-attention-dark text-center">
-          {pairMutation.error.message}
-        </p>
+        <SystemStateNotice
+          icon={CircleAlert}
+          title="Não foi possível iniciar o pareamento"
+          description={pairMutation.error.message}
+          tone="attention"
+          actionLabel="Tentar novamente"
+          onAction={() => pairMutation.mutate()}
+          live="assertive"
+        />
       )}
 
       {!pairingStarted && (

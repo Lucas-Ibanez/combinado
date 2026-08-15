@@ -4,6 +4,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useSimulations, useStartSimulation } from '@/features/simulations/hooks/useSimulations'
 import { useProtectedPerson } from '@/features/simulations/hooks/useProtectedPerson'
+import { CheckCircle2, CircleAlert, Loader2, ShieldCheck } from 'lucide-react'
+import { SystemStateNotice } from '@/components/common/SystemStatus'
 
 export default function DashboardPage() {
   const { data: session, isLoading } = useSession()
@@ -16,14 +18,21 @@ export default function DashboardPage() {
   return (
     <div className="p-6 flex flex-col items-center justify-center min-h-[60vh] text-center">
       <div className="w-12 h-12 rounded-full bg-brand-surface flex items-center justify-center mb-4">
-        <span className="text-brand text-xl">&#x2705;</span>
+        <ShieldCheck className="h-6 w-6 text-brand" aria-hidden="true" />
       </div>
       <h1 className="text-xl font-bold text-text mb-2">Tudo tranquilo</h1>
       <p className="text-text-muted text-sm max-w-xs mb-2">
         Nenhuma atividade suspeita detectada. Sua família está protegida.
       </p>
       <p className="text-xs text-text-muted mb-6">
-        {isLoading ? 'Carregando...' : session?.user?.email ?? ''}
+        {isLoading ? (
+          <span className="inline-flex items-center gap-1.5" role="status">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+            Carregando conta...
+          </span>
+        ) : (
+          session?.user?.email ?? ''
+        )}
       </p>
 
       {stats && stats.total > 0 && (
@@ -44,7 +53,14 @@ export default function DashboardPage() {
                 Ver mais
               </Link>
             </div>
-            <div className="w-full bg-neutral-100 rounded-full h-1.5 mt-2">
+            <div
+              className="w-full bg-neutral-100 rounded-full h-1.5 mt-2"
+              role="progressbar"
+              aria-label="Taxa de acerto nas simulações"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={stats.successRate}
+            >
               <div
                 className="bg-success h-1.5 rounded-full transition-all"
                 style={{ width: `${stats.successRate}%` }}
@@ -62,10 +78,25 @@ export default function DashboardPage() {
       </Button>
 
       {startMutation.isSuccess && (
-        <p className="text-xs text-success mt-2">Simulação enviada!</p>
+        <SystemStateNotice
+          icon={CheckCircle2}
+          title="Simulação enviada"
+          description="Aguarde a resposta do protegido."
+          tone="normal"
+          className="mt-3 w-full max-w-xs text-left"
+        />
       )}
       {startMutation.error && (
-        <p className="text-xs text-attention-dark mt-2">{startMutation.error.message}</p>
+        <SystemStateNotice
+          icon={CircleAlert}
+          title="Não foi possível enviar a simulação"
+          description={startMutation.error.message}
+          tone="attention"
+          actionLabel="Tentar novamente"
+          onAction={() => startMutation.mutate()}
+          live="assertive"
+          className="mt-3 w-full max-w-xs text-left"
+        />
       )}
 
       {pp && (

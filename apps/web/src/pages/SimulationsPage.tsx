@@ -2,22 +2,33 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { useSimulations, useStartSimulation } from '@/features/simulations/hooks/useSimulations'
 import { useProtectedPerson } from '@/features/simulations/hooks/useProtectedPerson'
+import {
+  CalendarClock,
+  CheckCircle2,
+  CircleAlert,
+  CircleX,
+  Clock3,
+  Loader2,
+  ShieldOff,
+  TimerOff,
+} from 'lucide-react'
+import { SystemStateNotice, SystemStatusBadge } from '@/components/common/SystemStatus'
 
 function StatusBadge({ status, correct }: { status: string; correct: boolean | null }) {
   if (status === 'responded' && correct) {
-    return <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-success-surface text-success-dark">Acertou</span>
+    return <SystemStatusBadge icon={CheckCircle2} label="Acertou" tone="normal" />
   }
   if (status === 'responded' && !correct) {
-    return <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-attention-surface text-attention-dark">Errou</span>
+    return <SystemStatusBadge icon={CircleX} label="Errou" tone="attention" />
   }
   if (status === 'sent') {
-    return <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-attention-surface text-attention-dark">Aguardando</span>
+    return <SystemStatusBadge icon={Clock3} label="Aguardando resposta" tone="attention" />
   }
   if (status === 'scheduled') {
-    return <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-brand-surface text-brand">Agendada</span>
+    return <SystemStatusBadge icon={CalendarClock} label="Agendada" tone="normal" />
   }
   if (status === 'expired') {
-    return <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-neutral-100 text-text-muted">Expirada</span>
+    return <SystemStatusBadge icon={TimerOff} label="Expirada" tone="neutral" />
   }
   return null
 }
@@ -40,18 +51,22 @@ export default function SimulationsPage() {
 
   if (ppLoading || isLoading) {
     return (
-      <div className="p-6 text-center text-text-muted text-sm">
-        Carregando...
+      <div className="p-6 text-center text-text-muted text-sm" role="status">
+        <Loader2 className="mr-2 inline h-4 w-4 animate-spin" aria-hidden="true" />
+        Carregando simulações...
       </div>
     )
   }
 
   if (!pp) {
     return (
-      <div className="p-6 text-center">
-        <p className="text-text-muted text-sm">
-          Nenhum protegido vinculado. Complete o onboarding primeiro.
-        </p>
+      <div className="p-6">
+        <SystemStateNotice
+          icon={ShieldOff}
+          title="Nenhum protegido vinculado"
+          description="Complete a configuração inicial antes de enviar uma simulação."
+          tone="neutral"
+        />
       </div>
     )
   }
@@ -93,7 +108,14 @@ export default function SimulationsPage() {
             </div>
 
             {stats.total > 0 && (
-              <div className="w-full bg-neutral-100 rounded-full h-2.5">
+              <div
+                className="w-full bg-neutral-100 rounded-full h-2.5"
+                role="progressbar"
+                aria-label="Taxa de acerto nas simulações"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={stats.successRate}
+              >
                 <div
                   className="bg-success h-2.5 rounded-full transition-all"
                   style={{ width: `${stats.successRate}%` }}
@@ -102,7 +124,8 @@ export default function SimulationsPage() {
             )}
 
             {stats.streak >= 3 && (
-              <p className="text-xs text-success-dark mt-2 text-center">
+              <p className="mt-2 flex items-center justify-center gap-1 text-xs text-success-dark">
+                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
                 {stats.streak} acertos seguidos — o hábito está se formando!
               </p>
             )}
@@ -120,15 +143,24 @@ export default function SimulationsPage() {
         </Button>
 
         {startMutation.error && (
-          <p className="text-sm text-attention-dark text-center">
-            {startMutation.error.message}
-          </p>
+          <SystemStateNotice
+            icon={CircleAlert}
+            title="Não foi possível enviar a simulação"
+            description={startMutation.error.message}
+            tone="attention"
+            actionLabel="Tentar novamente"
+            onAction={() => startMutation.mutate()}
+            live="assertive"
+          />
         )}
 
         {startMutation.isSuccess && (
-          <p className="text-sm text-success text-center">
-            Simulação enviada! Aguarde a resposta do protegido.
-          </p>
+          <SystemStateNotice
+            icon={CheckCircle2}
+            title="Simulação enviada"
+            description="Agora aguarde a resposta do protegido."
+            tone="normal"
+          />
         )}
       </div>
 
@@ -160,14 +192,12 @@ export default function SimulationsPage() {
       )}
 
       {rows.length === 0 && (
-        <div className="text-center py-8">
-          <p className="text-sm text-text-muted">
-            Nenhuma simulação enviada ainda.
-          </p>
-          <p className="text-xs text-text-muted mt-1">
-            Envie a primeira simulação para começar a praticar.
-          </p>
-        </div>
+        <SystemStateNotice
+          icon={CalendarClock}
+          title="Nenhuma simulação enviada ainda"
+          description="Use a ação acima para começar a praticar."
+          tone="neutral"
+        />
       )}
     </div>
   )

@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useAuditLog, type AuditEntry } from '@/hooks/useAuditLog'
-import { Shield, LogOut, ScrollText, Clock } from 'lucide-react'
+import { CheckCircle2, Shield, LogOut, ScrollText, Clock, Loader2 } from 'lucide-react'
+import { SystemStateNotice, SystemStatusBadge } from '@/components/common/SystemStatus'
 
 const ACTION_LABELS: Record<string, string> = {
   setup_family: 'Familia configurada',
@@ -84,9 +85,7 @@ export default function SettingsPage() {
               <p className="text-sm font-medium text-text">Verificacao em duas etapas</p>
               <p className="text-xs text-text-muted">TOTP ativo — protege sua conta contra acesso nao autorizado</p>
             </div>
-            <span className="text-xs font-medium text-success bg-success/10 rounded-full px-2 py-0.5">
-              Ativo
-            </span>
+            <SystemStatusBadge icon={CheckCircle2} label="Ativo" tone="normal" />
           </div>
 
           <div className="border-t border-border pt-3">
@@ -135,13 +134,19 @@ export default function SettingsPage() {
 
         <div className="rounded-xl border border-border bg-surface">
           {auditLoading ? (
-            <p className="text-sm text-text-muted text-center py-6">
-              Carregando...
+            <p className="flex items-center justify-center gap-2 text-sm text-text-muted text-center py-6" role="status">
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              Carregando atividades...
             </p>
           ) : !auditEntries || auditEntries.length === 0 ? (
-            <p className="text-sm text-text-muted text-center py-6">
-              Nenhuma atividade registrada.
-            </p>
+            <div className="p-3">
+              <SystemStateNotice
+                icon={ScrollText}
+                title="Nenhuma atividade registrada"
+                description="As ações de segurança da conta aparecerão aqui."
+                tone="neutral"
+              />
+            </div>
           ) : (
             <div className="px-4 divide-y divide-border">
               {auditEntries.map((entry) => (

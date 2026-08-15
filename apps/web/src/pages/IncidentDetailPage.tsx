@@ -4,13 +4,8 @@ import { useAcknowledgeIncident } from '@/features/incidents/hooks/useAcknowledg
 import DeliveryTimeline from '@/features/incidents/components/DeliveryTimeline'
 import CrisisView from '@/features/incidents/components/CrisisView'
 import type { Severity, IncidentStatus, IncidentDelivery } from '@combinado/shared'
-
-const SEVERITY_STYLES: Record<Severity, string> = {
-  critical: 'bg-attention-surface text-attention-dark',
-  high: 'bg-attention-surface text-attention-dark',
-  medium: 'bg-attention-surface text-attention-dark',
-  low: 'bg-brand-surface text-brand-dark',
-}
+import { CheckCircle2, CircleAlert, Clock3, Info, Loader2, ShieldAlert } from 'lucide-react'
+import { SystemStatusBadge } from '@/components/common/SystemStatus'
 
 const SEVERITY_LABELS: Record<Severity, string> = {
   critical: 'Crítico',
@@ -49,7 +44,10 @@ export default function IncidentDetailPage() {
   if (isLoading) {
     return (
       <div className="p-6 flex items-center justify-center min-h-[60vh]">
-        <p className="text-text-muted text-sm">Carregando detalhes...</p>
+        <p className="flex items-center gap-2 text-text-muted text-sm" role="status">
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          Carregando detalhes...
+        </p>
       </div>
     )
   }
@@ -57,8 +55,11 @@ export default function IncidentDetailPage() {
   if (error || !incident) {
     return (
       <div className="p-6 flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <p className="text-attention-dark text-sm">Incidente não encontrado.</p>
-        <Link to="/alerts" className="text-brand text-sm mt-2 underline">
+        <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg border border-attention/50 bg-attention-surface">
+          <ShieldAlert className="h-5 w-5 text-attention-dark" aria-hidden="true" />
+        </span>
+        <p className="text-attention-dark text-sm font-semibold">Incidente não encontrado.</p>
+        <Link to="/alerts" className="mt-3 rounded-lg border border-brand/30 bg-brand-surface px-3 py-2 text-sm font-semibold text-brand">
           Voltar aos alertas
         </Link>
       </div>
@@ -113,14 +114,16 @@ export default function IncidentDetailPage() {
 
       <div className="rounded-xl border border-border bg-surface p-4 mb-6">
         <div className="flex items-center gap-2 mb-3">
-          <span
-            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${SEVERITY_STYLES[severity]}`}
-          >
-            {SEVERITY_LABELS[severity]}
-          </span>
-          <span className="text-xs text-text-muted">
-            {STATUS_LABELS[status]}
-          </span>
+          <SystemStatusBadge
+            icon={severity === 'low' ? Info : CircleAlert}
+            label={`Risco ${SEVERITY_LABELS[severity].toLowerCase()}`}
+            tone={severity === 'low' ? 'normal' : 'attention'}
+          />
+          <SystemStatusBadge
+            icon={status === 'acknowledged' || status === 'closed' ? CheckCircle2 : Clock3}
+            label={STATUS_LABELS[status]}
+            tone={status === 'acknowledged' || status === 'closed' ? 'normal' : 'neutral'}
+          />
         </div>
 
         <h1 className="text-lg font-bold text-text mb-1">{personName}</h1>

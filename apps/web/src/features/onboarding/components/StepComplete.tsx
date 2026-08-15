@@ -3,6 +3,8 @@ import { useMutation } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { supabase } from '@/lib/supabase'
+import { CheckCircle2, CircleAlert, PartyPopper } from 'lucide-react'
+import { SystemStateNotice } from '@/components/common/SystemStatus'
 
 interface Props {
   protectedPersonId: string
@@ -30,7 +32,7 @@ export default function StepComplete({ protectedPersonId, onFinish }: Props) {
     <div className="space-y-6">
       <div className="text-center mb-2">
         <div className="w-14 h-14 rounded-full bg-success-surface flex items-center justify-center mx-auto mb-3">
-          <span className="text-2xl">🎉</span>
+          <PartyPopper className="h-7 w-7 text-success-dark" aria-hidden="true" />
         </div>
         <h2 className="text-xl font-bold text-text">Tudo Pronto!</h2>
         <p className="text-sm text-text-muted mt-1">
@@ -42,15 +44,15 @@ export default function StepComplete({ protectedPersonId, onFinish }: Props) {
         <CardContent className="pt-6">
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <span className="text-success text-lg">✓</span>
+              <CheckCircle2 className="h-5 w-5 shrink-0 text-success" aria-hidden="true" />
               <span className="text-sm text-text">Família criada</span>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-success text-lg">✓</span>
+              <CheckCircle2 className="h-5 w-5 shrink-0 text-success" aria-hidden="true" />
               <span className="text-sm text-text">Protegido adicionado</span>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-success text-lg">✓</span>
+              <CheckCircle2 className="h-5 w-5 shrink-0 text-success" aria-hidden="true" />
               <span className="text-sm text-text">Senha combinada definida</span>
             </div>
           </div>
@@ -65,9 +67,13 @@ export default function StepComplete({ protectedPersonId, onFinish }: Props) {
               O protegido receberá uma mensagem simulada e você poderá praticar a resposta correta.
             </p>
             {simulationMutation.error && (
-              <p className="text-sm text-attention-dark">
-                {simulationMutation.error.message}
-              </p>
+              <SystemStateNotice
+                icon={CircleAlert}
+                title="Não foi possível enviar a simulação"
+                description={simulationMutation.error.message}
+                tone="attention"
+                live="assertive"
+              />
             )}
             <Button
               variant="outline"
@@ -82,13 +88,12 @@ export default function StepComplete({ protectedPersonId, onFinish }: Props) {
       )}
 
       {simulationSent && (
-        <Card className="border-success-surface border-2">
-          <CardContent className="pt-6 text-center">
-            <p className="text-sm text-success-dark">
-              Simulação enviada! O protegido receberá uma mensagem de teste pelo WhatsApp.
-            </p>
-          </CardContent>
-        </Card>
+        <SystemStateNotice
+          icon={CheckCircle2}
+          title="Simulação enviada"
+          description="O protegido receberá uma mensagem de teste pelo WhatsApp."
+          tone="normal"
+        />
       )}
 
       <Button className="w-full" onClick={onFinish}>
