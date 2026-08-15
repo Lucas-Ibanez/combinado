@@ -30,6 +30,7 @@ import { registerProtocolSender } from './orchestrator/ladder/index.js'
 import { startSimulationWorker } from './simulation/index.js'
 import { attachSimulationResponseHandler } from './simulation/response-handler.js'
 import { attachVerificationHandler } from './verification/index.js'
+import { startRetentionCleanup } from './shared/retention/index.js'
 
 const log = createLogger('bootstrap')
 
@@ -79,14 +80,16 @@ async function main() {
   const risk = await startRisk(createLogger('risk'))
   const gateway = await startGateway(createLogger('gateway'))
   const http = startHttpServer(createLogger('http'))
+  const retention = startRetentionCleanup(createLogger('retention'))
 
-  log.info('serviço no ar', { roles: ['gateway', 'risk', 'orchestrator', 'simulation', 'http', 'official-wa'] })
+  log.info('serviço no ar', { roles: ['gateway', 'risk', 'orchestrator', 'simulation', 'http', 'official-wa', 'retention'] })
 
   async function shutdown(signal: string) {
     log.info('shutdown iniciado', { signal })
     try {
       // Fecha na ordem inversa: produtor primeiro (para de gerar), depois
       // consumidores (drenam o que já enfileiraram).
+      retention.stop()
       await http.stop()
       await gateway.stop()
       await risk.stop()

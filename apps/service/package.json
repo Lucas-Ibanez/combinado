@@ -34,6 +34,7 @@
     "test:guard": "tsx tests/channel-guard.smoke.ts",
     "test:envelope": "tsx tests/envelope.smoke.ts",
     "test:least-privilege": "tsx tests/least-privilege.smoke.ts",
+    "test:retention": "tsx tests/retention.smoke.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

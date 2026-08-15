@@ -11,6 +11,7 @@ import {
 } from '../baileys/index.js'
 import { normalize } from '../normalize/index.js'
 import { queue } from '../../shared/queue/index.js'
+import { hasActiveSignals } from '../../shared/retention/index.js'
 
 interface Session {
   handle: BaileysHandle
@@ -159,6 +160,16 @@ export class PairingManager {
       familyId: ctx.familyId,
       protectedPersonId: ctx.protectedPersonId,
     })
+
+    if (!hasActiveSignals(event.signals)) {
+      log.debug('mensagem sem sinais de risco — descartada', {
+        protected_person_id: event.protected_person_id,
+        wa_msg_id: event.event_id,
+        wa_type: event.message_type,
+      })
+      return
+    }
+
     try {
       const queueMsgId = await queue.enqueue('risk_queue', event)
       log.info('evento publicado em risk_queue', {

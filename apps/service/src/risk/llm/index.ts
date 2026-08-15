@@ -78,6 +78,10 @@ function getClient(): OpenAI | null {
   client = new OpenAI({
     apiKey: key,
     baseURL: 'https://integrate.api.nvidia.com/v1',
+    defaultHeaders: {
+      'X-No-Training': '1',
+      'X-No-Logging': '1',
+    },
   })
   return client
 }

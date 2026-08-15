@@ -961,7 +961,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T11.3 — Privacidade de terceiros: descarte e TTL
+### - [x] T11.3 — Privacidade de terceiros: descarte e TTL
 **O que será feito:** processar em memória sempre que possível; **descartar mensagens sem sinal**; não persistir conversas completas; guardar só features e excertos mínimos; TTL curto para áudio/mídia; garantir que o fornecedor de IA está **sem treinamento** e com **retenção desativada**. O guardião **nunca** vê conteúdo bruto.
 
 **Como garantir que foi feito corretamente:** nada de conversa integral fica armazenado; áudios expiram sozinhos; os logs (T4.4) não têm conteúdo.
