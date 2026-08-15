@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import EmotionalModeFrame from '@/components/common/EmotionalModeFrame'
+import CriticalActionDrawer from '@/components/common/CriticalActionDrawer'
 import {
   BellRing,
   CheckCircle2,
@@ -81,7 +82,7 @@ function GuardianCard({
   onRevoke: (linkId: string) => void
   revoking: boolean
 }) {
-  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   return (
     <Card>
@@ -93,7 +94,7 @@ function GuardianCard({
             <div className="flex gap-2 mt-1">
               <SystemStatusBadge
                 icon={guardian.role === 'primary' ? Star : UserRound}
-                label={guardian.role === 'primary' ? 'Guardião principal' : 'Guardião secundário'}
+                label={guardian.role === 'primary' ? 'Guardiao principal' : 'Guardiao secundario'}
                 tone={guardian.role === 'primary' ? 'normal' : 'neutral'}
               />
               <span className="text-xs text-text-muted">
@@ -103,46 +104,25 @@ function GuardianCard({
           </div>
         </div>
 
-        {!confirmOpen ? (
-          <Button
-            variant="destructive"
-            size="sm"
-            className="w-full mt-3"
-            onClick={() => setConfirmOpen(true)}
-          >
-            Revogar acesso
-          </Button>
-        ) : (
-          <div className="mt-3 space-y-2">
-            <SystemStateNotice
-              icon={CircleAlert}
-              title={`Revogar o acesso de ${guardian.display_name}?`}
-              description="Essa pessoa perderá acesso à sua proteção e não poderá mais monitorar mensagens nem receber alertas."
-              tone="attention"
-              live="assertive"
-            />
-            <div className="flex gap-2">
-              <Button
-                variant="destructive"
-                size="sm"
-                className="flex-1"
-                onClick={() => onRevoke(guardian.link_id)}
-                disabled={revoking}
-              >
-                {revoking ? 'Revogando...' : 'Sim, revogar'}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1"
-                onClick={() => setConfirmOpen(false)}
-                disabled={revoking}
-              >
-                Cancelar
-              </Button>
-            </div>
-          </div>
-        )}
+        <Button
+          variant="destructive"
+          size="sm"
+          className="w-full mt-3"
+          onClick={() => setDrawerOpen(true)}
+        >
+          Revogar acesso
+        </Button>
+
+        <CriticalActionDrawer
+          open={drawerOpen}
+          onOpenChange={setDrawerOpen}
+          title={`Revogar acesso de ${guardian.display_name}?`}
+          description="Essa pessoa perdera acesso a sua protecao e nao podera mais monitorar mensagens nem receber alertas."
+          confirmLabel="Deslize para revogar"
+          onConfirm={() => onRevoke(guardian.link_id)}
+          disabled={revoking}
+          tone="danger"
+        />
       </CardContent>
     </Card>
   )

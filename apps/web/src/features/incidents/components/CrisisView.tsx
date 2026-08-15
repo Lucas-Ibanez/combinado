@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import type { IncidentDelivery, Severity } from '@combinado/shared'
 import { CircleAlert, Phone, ShieldAlert, UserPlus, MessageCircleWarning, PhoneCall } from 'lucide-react'
 import EmotionalModeFrame from '@/components/common/EmotionalModeFrame'
 import { SystemStateNotice } from '@/components/common/SystemStatus'
+import CriticalActionDrawer from '@/components/common/CriticalActionDrawer'
 
 interface CrisisViewProps {
   personName: string
@@ -66,6 +68,7 @@ export default function CrisisView({
   const signals = parseSignals(summary)
   const currentStep = deliveries.filter((d) => !d.failure_reason && !d.acknowledged_at).length
   const totalSteps = deliveries.length
+  const [drawerAction, setDrawerAction] = useState<string | null>(null)
 
   return (
     <EmotionalModeFrame
@@ -146,7 +149,7 @@ export default function CrisisView({
           {ackError && (
             <SystemStateNotice
               icon={CircleAlert}
-              title="Não foi possível registrar sua confirmação"
+              title="Nao foi possivel registrar sua confirmacao"
               description={ackError}
               tone="incident"
               live="assertive"
@@ -157,21 +160,21 @@ export default function CrisisView({
             <button
               type="button"
               disabled={isPending}
-              onClick={() => onAcknowledge?.('safe_confirmed')}
+              onClick={() => setDrawerAction('safe_confirmed')}
               className="flex items-center gap-3 w-full rounded-xl border-2 border-brand bg-surface py-3.5 px-4 text-sm font-semibold text-brand transition-colors active:bg-brand-surface disabled:opacity-50"
             >
               <MessageCircleWarning className="w-5 h-5 shrink-0" />
-              {isPending ? 'Confirmando...' : 'Liguei e confirmei — esta tudo bem'}
+              {isPending && drawerAction === 'safe_confirmed' ? 'Confirmando...' : 'Liguei e confirmei — esta tudo bem'}
             </button>
 
             <button
               type="button"
               disabled={isPending}
-              onClick={() => onAcknowledge?.('threat_confirmed')}
+              onClick={() => setDrawerAction('threat_confirmed')}
               className="flex items-center gap-3 w-full rounded-xl border-2 border-danger bg-surface py-3.5 px-4 text-sm font-semibold text-danger transition-colors active:bg-danger-surface disabled:opacity-50"
             >
               <ShieldAlert className="w-5 h-5 shrink-0" />
-              {isPending ? 'Confirmando...' : 'Nao reconheco este pedido'}
+              {isPending && drawerAction === 'threat_confirmed' ? 'Confirmando...' : 'Nao reconheco este pedido'}
             </button>
 
             <button
@@ -189,6 +192,28 @@ export default function CrisisView({
             Ao confirmar, {personName} recebera uma notificacao por SMS ou ligacao (canal independente do WhatsApp).
           </p>
         </div>
+
+        <CriticalActionDrawer
+          open={drawerAction === 'safe_confirmed'}
+          onOpenChange={(open) => { if (!open) setDrawerAction(null) }}
+          title="Confirmar que esta tudo bem"
+          description={`Voce ligou para ${personName}, usou a senha combinada e confirmou que o pedido e legitimo.`}
+          confirmLabel="Deslize para confirmar"
+          onConfirm={() => onAcknowledge?.('safe_confirmed')}
+          disabled={isPending}
+          tone="brand"
+        />
+
+        <CriticalActionDrawer
+          open={drawerAction === 'threat_confirmed'}
+          onOpenChange={(open) => { if (!open) setDrawerAction(null) }}
+          title="Reportar ameaca"
+          description={`${personName} recebera um alerta por SMS/ligacao para NAO fazer nenhuma transferencia. Esta acao nao pode ser desfeita.`}
+          confirmLabel="Deslize para reportar ameaca"
+          onConfirm={() => onAcknowledge?.('threat_confirmed')}
+          disabled={isPending}
+          tone="danger"
+        />
       </div>
     </EmotionalModeFrame>
   )

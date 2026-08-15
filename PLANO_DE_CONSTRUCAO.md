@@ -1019,7 +1019,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T12.3 — Vaul para drawers e anti-toque acidental
+### - [x] T12.3 — Vaul para drawers e anti-toque acidental
 **O que será feito:** usar o Vaul (instalado em T0.7) para drawers nativos no mobile. Ações críticas (acionar/bloquear) com gesto deliberado, tipo "deslize para confirmar", evitando disparo no bolso.
 
 **Como garantir que foi feito corretamente:** os drawers se comportam bem no celular e a ação crítica exige um gesto deliberado (não um toque simples).

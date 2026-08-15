@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>T12.3 Drawer Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: system-ui; max-width: 400px; margin: 40px auto; padding: 0 16px; }
+    h2 { font-size: 18px; }
+    p { color: #666; font-size: 14px; }
+    .files { background: #f5f5f5; padding: 12px; border-radius: 8px; font-size: 13px; }
+    .files li { margin: 4px 0; }
+    .ok { color: green; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>T12.3 — Vaul + Anti-toque acidental</h2>
+  <p>Componentes criados e integrados:</p>
+  <ul class="files">
+    <li><strong>drawer.tsx</strong> — Vaul drawer primitivo (shadcn pattern)</li>
+    <li><strong>SlideToConfirm.tsx</strong> — gesto deliberado de deslizar</li>
+    <li><strong>CriticalActionDrawer.tsx</strong> — drawer + slide para acoes criticas</li>
+  </ul>
+  <p>Integracoes:</p>
+  <ul class="files">
+    <li><strong>CrisisView</strong> — ack safe/threat usa drawer + slide</li>
+    <li><strong>ProtectedPanelPage</strong> — revogar guardiao usa drawer + slide</li>
+    <li><strong>SettingsPage</strong> — encerrar sessoes usa drawer + slide</li>
+    <li><strong>StepUpDialog</strong> — convertido de overlay para Vaul drawer</li>
+  </ul>
+  <p class="ok">Typecheck: OK | Build errors: 0</p>
+</body>
+</html>

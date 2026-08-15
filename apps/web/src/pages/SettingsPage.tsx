@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuditLog, type AuditEntry } from '@/hooks/useAuditLog'
 import { CheckCircle2, Shield, LogOut, ScrollText, Clock, Loader2 } from 'lucide-react'
 import { SystemStateNotice, SystemStatusBadge } from '@/components/common/SystemStatus'
+import CriticalActionDrawer from '@/components/common/CriticalActionDrawer'
 
 const ACTION_LABELS: Record<string, string> = {
   setup_family: 'Familia configurada',
@@ -51,6 +52,7 @@ export default function SettingsPage() {
   const queryClient = useQueryClient()
   const { data: auditEntries, isLoading: auditLoading } = useAuditLog()
   const [signingOut, setSigningOut] = useState(false)
+  const [signOutAllOpen, setSignOutAllOpen] = useState(false)
 
   async function handleSignOutAll() {
     setSigningOut(true)
@@ -113,7 +115,7 @@ export default function SettingsPage() {
 
           <button
             type="button"
-            onClick={handleSignOutAll}
+            onClick={() => setSignOutAllOpen(true)}
             disabled={signingOut}
             className="w-full rounded-lg border border-attention text-attention-dark px-4 py-2.5 text-sm font-medium hover:bg-attention-surface transition-colors disabled:opacity-50"
           >
@@ -123,6 +125,17 @@ export default function SettingsPage() {
           <p className="text-xs text-text-muted">
             "Encerrar todas" desconecta todos os dispositivos onde sua conta esta logada.
           </p>
+
+          <CriticalActionDrawer
+            open={signOutAllOpen}
+            onOpenChange={setSignOutAllOpen}
+            title="Encerrar todas as sessoes?"
+            description="Todos os dispositivos serao desconectados, incluindo este. Voce precisara fazer login novamente."
+            confirmLabel="Deslize para encerrar tudo"
+            onConfirm={handleSignOutAll}
+            disabled={signingOut}
+            tone="danger"
+          />
         </div>
       </section>
 
