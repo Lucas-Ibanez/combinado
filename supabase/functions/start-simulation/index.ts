@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
       family_id: familyId,
       actor_id: guardianId,
       actor_type: "guardian",
-      action: `start_simulation:${guardianId}`,
+      action: "start_simulation",
       target_type: "simulation",
       target_id: data,
       metadata: { protected_person_id: protectedPersonId },

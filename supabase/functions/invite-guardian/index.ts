@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import {
-  authGuard,
+  stepUpAuthGuard,
   getServiceClient,
   HttpError,
 } from "../_shared/index.ts";
@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
       throw new HttpError(405, "Method not allowed");
     }
 
-    const { guardianId, familyId } = await authGuard(req);
+    const { guardianId, familyId } = await stepUpAuthGuard(req);
 
     const body = await req.json();
     const { protected_person_id } = body;

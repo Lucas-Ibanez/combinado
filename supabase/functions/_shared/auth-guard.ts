@@ -5,6 +5,10 @@ export interface AuthResult {
   familyId: string;
 }
 
+export interface StepUpAuthResult extends AuthResult {
+  aal: string;
+}
+
 export interface AuthUserResult {
   userId: string;
 }
@@ -57,6 +61,36 @@ export async function authUser(req: Request): Promise<AuthUserResult> {
   }
 
   return { userId: user.id };
+}
+
+export async function stepUpAuthGuard(req: Request): Promise<StepUpAuthResult> {
+  const result = await authGuard(req);
+
+  const authHeader = req.headers.get("Authorization")!;
+  const token = authHeader.replace("Bearer ", "");
+  const aal = extractAal(token);
+
+  if (aal !== "aal2") {
+    throw new HttpError(
+      403,
+      "Step-up auth required: verify MFA to perform this action",
+    );
+  }
+
+  return { ...result, aal };
+}
+
+function extractAal(jwt: string): string {
+  try {
+    const parts = jwt.split(".");
+    if (parts.length < 2) return "aal1";
+    const payload = parts[1];
+    const padded = payload + "=".repeat((4 - (payload.length % 4)) % 4);
+    const decoded = JSON.parse(atob(padded));
+    return decoded.aal ?? "aal1";
+  } catch {
+    return "aal1";
+  }
 }
 
 export class HttpError extends Error {

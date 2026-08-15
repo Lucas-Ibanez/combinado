@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import {
-  authGuard,
+  stepUpAuthGuard,
   assertGuardianLink,
   getServiceClient,
   getIdempotencyKey,
@@ -13,9 +13,9 @@ Deno.serve(async (req) => {
       throw new HttpError(405, "Method not allowed");
     }
 
-    // 1. Autenticar
+    // 1. Autenticar com step-up (requer MFA verificado recentemente)
     const authHeader = req.headers.get("Authorization")!;
-    const { guardianId, familyId } = await authGuard(req);
+    const { guardianId, familyId } = await stepUpAuthGuard(req);
 
     // 2. Ler body
     const body = await req.json();

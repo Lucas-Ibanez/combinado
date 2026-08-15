@@ -21,7 +21,9 @@ import {
   Copy,
   Check,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
+import { useStepUp } from '@/hooks/useStepUp'
+import StepUpDialog from '@/components/common/StepUpDialog'
 
 const STATUS_CONFIG: Record<
   BaileysStatus,
@@ -181,7 +183,13 @@ function GuardianCard({ guardian }: { guardian: GuardianInfo }) {
   )
 }
 
-function InviteSection({ persons }: { persons: ProtectedPersonStatus[] }) {
+function InviteSection({
+  persons,
+  requireStepUp,
+}: {
+  persons: ProtectedPersonStatus[]
+  requireStepUp: (action: () => void) => Promise<void>
+}) {
   const createInvite = useCreateInvite()
   const { data: pendingInvites } = usePendingInvites()
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
@@ -189,7 +197,7 @@ function InviteSection({ persons }: { persons: ProtectedPersonStatus[] }) {
 
   async function handleInvite() {
     if (!selectedPerson) return
-    createInvite.mutate(selectedPerson)
+    await requireStepUp(() => createInvite.mutate(selectedPerson))
   }
 
   async function handleCopyCode(code: string) {
@@ -284,6 +292,30 @@ function InviteSection({ persons }: { persons: ProtectedPersonStatus[] }) {
 export default function ProtectionPage() {
   const { data: persons, isLoading: loadingPersons, error: errorPersons } = useProtectedPersons()
   const { data: guardians, isLoading: loadingGuardians, error: errorGuardians } = useGuardians()
+  const stepUp = useStepUp()
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null)
+
+  const requireStepUp = useCallback(async (action: () => void) => {
+    const ok = await stepUp.ensureAal2()
+    if (ok) {
+      action()
+    } else {
+      setPendingAction(() => action)
+    }
+  }, [stepUp])
+
+  async function handleStepUpVerify(code: string) {
+    const ok = await stepUp.verify(code)
+    if (ok && pendingAction) {
+      pendingAction()
+      setPendingAction(null)
+    }
+  }
+
+  function handleStepUpCancel() {
+    setPendingAction(null)
+    stepUp.reset()
+  }
 
   const isLoading = loadingPersons || loadingGuardians
   const error = errorPersons || errorGuardians
@@ -338,8 +370,16 @@ export default function ProtectionPage() {
       </section>
 
       {persons && persons.length > 0 && (
-        <InviteSection persons={persons} />
+        <InviteSection persons={persons} requireStepUp={requireStepUp} />
       )}
+
+      <StepUpDialog
+        open={stepUp.status === 'needed' || stepUp.status === 'verifying'}
+        error={stepUp.error}
+        loading={stepUp.status === 'verifying'}
+        onVerify={handleStepUpVerify}
+        onCancel={handleStepUpCancel}
+      />
 
       <section>
         <h2 className="text-sm font-semibold text-text mb-3">

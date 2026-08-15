@@ -970,7 +970,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T11.4 — Endurecimento da conta do guardião
+### - [x] T11.4 — Endurecimento da conta do guardião
 **O que será feito:** MFA obrigatório (já ativo, T1.6/T3.6), **step-up auth** para ações sensíveis (adicionar protegido, trocar número), sessões revogáveis e um `audit_log` de todas as intervenções. Recuperação que **não** dependa só de e-mail.
 
 **Como garantir que foi feito corretamente:** ações sensíveis exigem reautenticação e ficam registradas no `audit_log`.
