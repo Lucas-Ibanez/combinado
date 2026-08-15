@@ -13,6 +13,7 @@ export type IncidentDelivery = Tables<'incident_deliveries'>
 export type RiskEvent = Tables<'risk_events'>
 export type Simulation = Tables<'simulations'>
 export type AuditLogEntry = Tables<'audit_log'>
+export type GuardianInvite = Tables<'guardian_invites'>
 
 // ---------------------------------------------------------------------------
 // Enums derivados dos CHECK constraints do schema

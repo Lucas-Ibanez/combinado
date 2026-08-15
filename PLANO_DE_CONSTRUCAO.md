@@ -928,7 +928,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T10.5 — Múltiplos guardiões (rede + redundância)
+### - [x] T10.5 — Múltiplos guardiões (rede + redundância)
 **O que será feito:** permitir irmãos compartilhando a proteção do mesmo protegido — que também vira o degrau "2º guardião" da escada de entrega.
 
 **Como garantir que foi feito corretamente:** dois guardiões acompanham o mesmo protegido e a escada aciona o segundo quando o primeiro não confirma.

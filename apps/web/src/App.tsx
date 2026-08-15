@@ -14,6 +14,7 @@ import MfaVerifyPage from '@/pages/MfaVerifyPage'
 import OnboardingPage from '@/pages/OnboardingPage'
 import SimulationsPage from '@/pages/SimulationsPage'
 import ProtectedPanelPage from '@/pages/ProtectedPanelPage'
+import AcceptInvitePage from '@/pages/AcceptInvitePage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="/mfa/verify" element={<MfaVerifyPage />} />
           <Route element={<ProtectedRoute />}>
             <Route path="onboarding" element={<OnboardingPage />} />
+            <Route path="accept-invite" element={<AcceptInvitePage />} />
             <Route element={<AppLayout />}>
               <Route index element={<DashboardPage />} />
               <Route path="alerts" element={<IncidentsPage />} />

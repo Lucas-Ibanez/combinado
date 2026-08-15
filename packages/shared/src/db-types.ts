@@ -80,6 +80,64 @@ export type Database = {
         }
         Relationships: []
       }
+      guardian_invites: {
+        Row: {
+          id: string
+          family_id: string
+          invited_by: string
+          protected_person_id: string
+          invite_code: string
+          status: string
+          accepted_by: string | null
+          expires_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          family_id: string
+          invited_by: string
+          protected_person_id: string
+          invite_code: string
+          status?: string
+          accepted_by?: string | null
+          expires_at?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          family_id?: string
+          invited_by?: string
+          protected_person_id?: string
+          invite_code?: string
+          status?: string
+          accepted_by?: string | null
+          expires_at?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guardian_invites_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guardian_invites_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "guardians"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guardian_invites_protected_person_id_fkey"
+            columns: ["protected_person_id"]
+            isOneToOne: false
+            referencedRelation: "protected_persons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guardian_links: {
         Row: {
           created_at: string
@@ -525,6 +583,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_invite_tx: {
+        Args: {
+          p_user_id: string
+          p_invite_code: string
+          p_display_name: string
+          p_phone?: string
+        }
+        Returns: Json
+      }
       acknowledge_incident_tx: {
         Args: {
           p_family_id: string
