@@ -1,9 +1,9 @@
-import { useState } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
+import { QRCodeSVG } from 'qrcode.react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { supabase } from '@/lib/supabase'
-import { CheckCircle2, CircleAlert, Loader2, QrCode, Smartphone } from 'lucide-react'
+import { CheckCircle2, CircleAlert, Loader2, Smartphone } from 'lucide-react'
 import { SystemStateNotice } from '@/components/common/SystemStatus'
 
 interface Props {
@@ -13,7 +13,19 @@ interface Props {
 }
 
 export default function StepPairWhatsApp({ protectedPersonId, onComplete, onSkip }: Props) {
-  const [pairingStarted, setPairingStarted] = useState(false)
+  const { data: status, error: pollError } = useQuery({
+    queryKey: ['pairing-status', protectedPersonId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('protected_persons')
+        .select('baileys_status, baileys_pairing_qr')
+        .eq('id', protectedPersonId)
+        .single()
+      if (error) throw error
+      return data
+    },
+    refetchInterval: 3000,
+  })
 
   const pairMutation = useMutation({
     mutationFn: async () => {
@@ -24,27 +36,12 @@ export default function StepPairWhatsApp({ protectedPersonId, onComplete, onSkip
       if (!data?.ok) throw new Error(data?.error ?? 'Erro desconhecido')
       return data
     },
-    onSuccess: () => {
-      setPairingStarted(true)
-    },
-  })
-
-  const { data: status } = useQuery({
-    queryKey: ['pairing-status', protectedPersonId],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('protected_persons')
-        .select('baileys_status, baileys_pairing_qr')
-        .eq('id', protectedPersonId)
-        .single()
-      return data
-    },
-    enabled: pairingStarted,
-    refetchInterval: pairingStarted ? 3000 : false,
   })
 
   const isPaired = status?.baileys_status === 'paired'
+  const isPairing = status?.baileys_status === 'pairing' || status?.baileys_status === 'pairing_requested'
   const qrCode = status?.baileys_pairing_qr
+  const pairingStarted = pairMutation.isSuccess || isPairing
 
   if (isPaired) {
     return (
@@ -111,10 +108,10 @@ export default function StepPairWhatsApp({ protectedPersonId, onComplete, onSkip
           <CardContent className="pt-6 flex flex-col items-center">
             <p className="text-sm font-medium text-text mb-3">Escaneie este QR Code:</p>
             <div className="bg-white p-4 rounded-lg border border-border">
-              <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrCode)}`}
-                alt="QR Code para pareamento"
-                className="w-48 h-48"
+              <QRCodeSVG
+                value={qrCode}
+                size={192}
+                level="M"
               />
             </div>
             <p className="mt-3 flex items-center gap-2 text-xs text-text-muted" role="status">
@@ -129,18 +126,18 @@ export default function StepPairWhatsApp({ protectedPersonId, onComplete, onSkip
         <Card>
           <CardContent className="pt-6 text-center">
             <p className="flex items-center justify-center gap-2 text-sm text-text-muted" role="status">
-              <QrCode className="h-4 w-4" aria-hidden="true" />
+              <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
               Gerando QR Code...
             </p>
           </CardContent>
         </Card>
       )}
 
-      {pairMutation.error && (
+      {(pairMutation.error || pollError) && (
         <SystemStateNotice
           icon={CircleAlert}
-          title="Não foi possível iniciar o pareamento"
-          description={pairMutation.error.message}
+          title="Erro no pareamento"
+          description={pairMutation.error?.message ?? (pollError as Error)?.message ?? 'Erro desconhecido'}
           tone="attention"
           actionLabel="Tentar novamente"
           onAction={() => pairMutation.mutate()}
