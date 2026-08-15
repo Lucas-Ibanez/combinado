@@ -988,7 +988,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T11.6 — Relatório de Impacto (LGPD) e localidade de dados
+### - [x] T11.6 — Relatório de Impacto (LGPD) e localidade de dados
 **O que será feito:** iniciar o Relatório de Impacto à Proteção de Dados (RIPD), documentar bases legais (prevenção à fraude/legítimo interesse, com as ressalvas para dado sensível) e garantir dados no Brasil ou mecanismo formal de transferência internacional (ANPD 2024). Buscar orientação jurídica específica.
 
 **Como garantir que foi feito corretamente:** existe um RIPD em andamento e a localidade dos dados está definida.
