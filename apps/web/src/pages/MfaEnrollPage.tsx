@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import EmotionalModeFrame from '@/components/common/EmotionalModeFrame'
 
 export default function MfaEnrollPage() {
   const navigate = useNavigate()
@@ -67,7 +68,7 @@ export default function MfaEnrollPage() {
   }
 
   return (
-    <div className="min-h-screen bg-brand flex flex-col items-center justify-center p-8">
+    <EmotionalModeFrame mode="normal" className="min-h-screen flex flex-col items-center justify-center p-8">
       <div className="bg-surface rounded-2xl shadow-lg p-8 w-full max-w-sm">
         <h1 className="text-xl font-bold text-brand text-center mb-1">
           Ativar verificação em duas etapas
@@ -125,7 +126,7 @@ export default function MfaEnrollPage() {
               </div>
 
               {error && (
-                <p className="text-sm text-danger bg-danger-surface rounded-lg px-3 py-2">
+                <p className="text-sm text-attention-dark bg-attention-surface rounded-lg px-3 py-2">
                   {error}
                 </p>
               )}
@@ -144,13 +145,13 @@ export default function MfaEnrollPage() {
             </p>
           </>
         ) : error ? (
-          <p className="text-sm text-danger bg-danger-surface rounded-lg px-3 py-2">
+          <p className="text-sm text-attention-dark bg-attention-surface rounded-lg px-3 py-2">
             {error}
           </p>
         ) : (
           <p className="text-text-muted text-center text-sm">Gerando QR code...</p>
         )}
       </div>
-    </div>
+    </EmotionalModeFrame>
   )
 }

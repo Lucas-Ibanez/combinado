@@ -65,7 +65,7 @@ export default function DashboardPage() {
         <p className="text-xs text-success mt-2">Simulação enviada!</p>
       )}
       {startMutation.error && (
-        <p className="text-xs text-danger mt-2">{startMutation.error.message}</p>
+        <p className="text-xs text-attention-dark mt-2">{startMutation.error.message}</p>
       )}
 
       {pp && (

@@ -5,6 +5,7 @@ import StepPairWhatsApp from '@/features/onboarding/components/StepPairWhatsApp'
 import StepChannelCeremony from '@/features/onboarding/components/StepChannelCeremony'
 import StepTestNotification from '@/features/onboarding/components/StepTestNotification'
 import StepComplete from '@/features/onboarding/components/StepComplete'
+import EmotionalModeFrame from '@/components/common/EmotionalModeFrame'
 
 const STEP_LABELS = [
   'Círculo',
@@ -31,7 +32,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface">
+    <EmotionalModeFrame mode="normal" className="min-h-screen">
       <div className="max-w-md mx-auto px-4 py-6">
         {/* Header */}
         <div className="mb-6">
@@ -98,6 +99,6 @@ export default function OnboardingPage() {
           />
         )}
       </div>
-    </div>
+    </EmotionalModeFrame>
   )
 }

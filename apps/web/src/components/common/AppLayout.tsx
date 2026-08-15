@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { useIncidentsRealtime } from '@/features/incidents/hooks/useIncidentsRealtime'
+import EmotionalModeFrame from '@/components/common/EmotionalModeFrame'
 
 const navItems = [
   { to: '/', label: 'Início' },
@@ -12,7 +13,7 @@ export default function AppLayout() {
   useIncidentsRealtime()
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col">
+    <EmotionalModeFrame mode="normal" className="min-h-screen flex flex-col">
       <main className="flex-1">
         <Outlet />
       </main>
@@ -36,6 +37,6 @@ export default function AppLayout() {
           ))}
         </div>
       </nav>
-    </div>
+    </EmotionalModeFrame>
   )
 }

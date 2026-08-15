@@ -15,7 +15,7 @@ export default function IncidentsPage() {
   if (error) {
     return (
       <div className="p-6 flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <p className="text-danger text-sm">Erro ao carregar alertas.</p>
+        <p className="text-attention-dark text-sm">Erro ao carregar alertas.</p>
         <p className="text-text-muted text-xs mt-1">Tente novamente em instantes.</p>
       </div>
     )

@@ -65,7 +65,7 @@ export default function StepComplete({ protectedPersonId, onFinish }: Props) {
               O protegido receberá uma mensagem simulada e você poderá praticar a resposta correta.
             </p>
             {simulationMutation.error && (
-              <p className="text-sm text-danger">
+              <p className="text-sm text-attention-dark">
                 {simulationMutation.error.message}
               </p>
             )}

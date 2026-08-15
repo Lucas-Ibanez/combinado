@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import EmotionalModeFrame from '@/components/common/EmotionalModeFrame'
 import {
   useProtectedPanel,
   useRevokeGuardian,
@@ -11,9 +12,9 @@ import {
 
 function SeverityBadge({ severity }: { severity: string }) {
   const styles: Record<string, string> = {
-    critical: 'bg-danger-surface text-danger-dark',
-    high: 'bg-danger-surface text-danger-dark',
-    medium: 'bg-warning-surface text-warning-dark',
+    critical: 'bg-attention-surface text-attention-dark',
+    high: 'bg-attention-surface text-attention-dark',
+    medium: 'bg-attention-surface text-attention-dark',
     low: 'bg-brand-surface text-brand',
   }
   const labels: Record<string, string> = {
@@ -92,8 +93,8 @@ function GuardianCard({
           </Button>
         ) : (
           <div className="mt-3 space-y-2">
-            <div className="bg-danger-surface rounded-lg p-3">
-              <p className="text-sm text-danger-dark">
+            <div className="bg-attention-surface rounded-lg p-3">
+              <p className="text-sm text-attention-dark">
                 Tem certeza? <strong>{guardian.display_name}</strong> perderá acesso
                 à sua proteção e não poderá mais monitorar mensagens nem receber alertas.
               </p>
@@ -155,32 +156,32 @@ export default function ProtectedPanelPage() {
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-surface flex items-center justify-center p-6">
+      <EmotionalModeFrame mode="normal" className="min-h-screen flex items-center justify-center p-6">
         <Card className="max-w-sm w-full">
           <CardContent className="pt-6 text-center">
-            <p className="text-sm text-danger">
+            <p className="text-sm text-attention-dark">
               Link inválido. Use o link enviado pelo Combinado no seu WhatsApp.
             </p>
           </CardContent>
         </Card>
-      </div>
+      </EmotionalModeFrame>
     )
   }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-surface flex items-center justify-center">
+      <EmotionalModeFrame mode="normal" className="min-h-screen flex items-center justify-center">
         <p className="text-sm text-text-muted">Carregando seu painel...</p>
-      </div>
+      </EmotionalModeFrame>
     )
   }
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-surface flex items-center justify-center p-6">
+      <EmotionalModeFrame mode="normal" className="min-h-screen flex items-center justify-center p-6">
         <Card className="max-w-sm w-full">
           <CardContent className="pt-6 text-center space-y-3">
-            <p className="text-sm text-danger">
+            <p className="text-sm text-attention-dark">
               {(error as Error)?.message ?? 'Não foi possível carregar o painel.'}
             </p>
             <p className="text-xs text-text-muted">
@@ -188,12 +189,12 @@ export default function ProtectedPanelPage() {
             </p>
           </CardContent>
         </Card>
-      </div>
+      </EmotionalModeFrame>
     )
   }
 
   return (
-    <div className="min-h-screen bg-surface">
+    <EmotionalModeFrame mode="normal" className="min-h-screen">
       <div className="max-w-lg mx-auto p-6 space-y-6">
         <div className="text-center">
           <div className="w-14 h-14 rounded-full bg-brand-surface flex items-center justify-center mx-auto mb-3">
@@ -246,7 +247,7 @@ export default function ProtectedPanelPage() {
             </p>
           )}
           {revokeMutation.error && (
-            <p className="text-sm text-danger text-center mt-3">
+            <p className="text-sm text-attention-dark text-center mt-3">
               {revokeMutation.error.message}
             </p>
           )}
@@ -312,6 +313,6 @@ export default function ProtectedPanelPage() {
           Este link é pessoal. Não compartilhe com terceiros.
         </p>
       </div>
-    </div>
+    </EmotionalModeFrame>
   )
 }

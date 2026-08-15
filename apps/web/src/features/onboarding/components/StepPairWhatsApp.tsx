@@ -129,7 +129,7 @@ export default function StepPairWhatsApp({ protectedPersonId, onComplete, onSkip
       )}
 
       {pairMutation.error && (
-        <p className="text-sm text-danger text-center">
+        <p className="text-sm text-attention-dark text-center">
           {pairMutation.error.message}
         </p>
       )}

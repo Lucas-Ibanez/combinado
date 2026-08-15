@@ -18,14 +18,14 @@ const SIGNAL_LABELS: Record<string, string> = {
 function RiskBadge({ level }: { level: string }) {
   if (level === 'dangerous') {
     return (
-      <span className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1 rounded-full bg-danger-surface text-danger-dark">
+      <span className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1 rounded-full bg-attention-surface text-attention-dark">
         Alto Risco
       </span>
     )
   }
   if (level === 'suspicious') {
     return (
-      <span className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1 rounded-full bg-warning-surface text-warning-dark">
+      <span className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1 rounded-full bg-attention-surface text-attention-dark">
         Suspeito
       </span>
     )
@@ -45,9 +45,9 @@ function ResultCard({ result }: { result: CheckMessageResult }) {
   return (
     <Card className={
       result.risk_level === 'dangerous'
-        ? 'border-danger border-2'
+        ? 'border-attention border-2'
         : result.risk_level === 'suspicious'
-          ? 'border-warning border-2'
+          ? 'border-attention border-2'
           : 'border-success border-2'
     }>
       <CardHeader className="pb-3">
@@ -168,7 +168,7 @@ export default function ChatPage() {
       </form>
 
       {checkMutation.error && (
-        <p className="text-sm text-danger text-center">
+        <p className="text-sm text-attention-dark text-center">
           {checkMutation.error.message}
         </p>
       )}

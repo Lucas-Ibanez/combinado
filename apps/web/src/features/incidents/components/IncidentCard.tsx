@@ -5,9 +5,16 @@ interface IncidentWithPerson extends Incident {
   protected_persons: { display_name: string } | null
 }
 
-const SEVERITY_STYLES: Record<Severity, string> = {
+const ACTIVE_SEVERITY_STYLES: Record<Severity, string> = {
   critical: 'bg-danger-surface text-danger-dark',
   high: 'bg-danger-surface text-danger-dark',
+  medium: 'bg-attention-surface text-attention-dark',
+  low: 'bg-brand-surface text-brand-dark',
+}
+
+const HISTORY_SEVERITY_STYLES: Record<Severity, string> = {
+  critical: 'bg-attention-surface text-attention-dark',
+  high: 'bg-attention-surface text-attention-dark',
   medium: 'bg-attention-surface text-attention-dark',
   low: 'bg-brand-surface text-brand-dark',
 }
@@ -62,7 +69,11 @@ export default function IncidentCard({ incident }: { incident: IncidentWithPerso
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <span
-              className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${SEVERITY_STYLES[severity]}`}
+              className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                active
+                  ? ACTIVE_SEVERITY_STYLES[severity]
+                  : HISTORY_SEVERITY_STYLES[severity]
+              }`}
             >
               {SEVERITY_LABELS[severity]}
             </span>

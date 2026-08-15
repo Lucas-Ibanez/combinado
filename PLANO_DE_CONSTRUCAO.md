@@ -1003,7 +1003,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T12.1 — Consolidar os dois modos emocionais
+### - [x] T12.1 — Consolidar os dois modos emocionais
 **O que será feito:** modo normal calmo e discreto; modo incidente diretivo e enfático. Garantir a transição clara entre eles e que o vermelho só aparece na crise.
 
 **Como garantir que foi feito corretamente:** os dois modos estão visualmente distintos e coerentes entre si.

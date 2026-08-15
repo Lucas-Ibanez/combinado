@@ -32,7 +32,7 @@ const STATUS_CONFIG: Record<
   paired: { label: 'Conectado', color: 'text-success', icon: Wifi, urgent: false },
   reconnecting: { label: 'Reconectando...', color: 'text-attention', icon: Loader2, urgent: false },
   pairing: { label: 'Pareando...', color: 'text-attention', icon: Loader2, urgent: false },
-  disconnected: { label: 'Desconectado', color: 'text-danger', icon: WifiOff, urgent: true },
+  disconnected: { label: 'Desconectado', color: 'text-attention-dark', icon: WifiOff, urgent: true },
   unpaired: { label: 'Não vinculado', color: 'text-text-muted', icon: WifiOff, urgent: false },
 }
 
@@ -92,7 +92,7 @@ function SessionCard({ person }: { person: ProtectedPersonStatus }) {
     <div
       className={`rounded-xl border p-4 ${
         isDisconnected
-          ? 'border-danger bg-danger-surface'
+          ? 'border-attention bg-attention-surface'
           : 'border-border bg-surface'
       }`}
     >
@@ -110,11 +110,11 @@ function SessionCard({ person }: { person: ProtectedPersonStatus }) {
       </div>
 
       {isDisconnected && (
-        <div className="mt-3 rounded-lg bg-danger/10 px-3 py-2">
-          <p className="text-sm font-semibold text-danger">
+        <div className="mt-3 rounded-lg bg-attention/10 px-3 py-2">
+          <p className="text-sm font-semibold text-attention-dark">
             Proteção interrompida
           </p>
-          <p className="text-xs text-danger-dark mt-0.5">
+          <p className="text-xs text-attention-dark mt-0.5">
             As mensagens deste protegido não estão sendo monitoradas. Verifique a conexão do serviço.
           </p>
         </div>
@@ -282,7 +282,7 @@ function InviteSection({
         )}
 
         {createInvite.error && (
-          <p className="text-xs text-danger">{createInvite.error.message}</p>
+          <p className="text-xs text-attention-dark">{createInvite.error.message}</p>
         )}
       </div>
     </section>
@@ -331,7 +331,7 @@ export default function ProtectionPage() {
   if (error) {
     return (
       <div className="p-6 flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <p className="text-danger text-sm">Erro ao carregar estado da proteção.</p>
+        <p className="text-attention-dark text-sm">Erro ao carregar estado da proteção.</p>
         <p className="text-text-muted text-xs mt-1">Tente novamente em instantes.</p>
       </div>
     )
@@ -344,9 +344,9 @@ export default function ProtectionPage() {
   return (
     <div className="p-4 pb-6 space-y-6">
       {hasDisconnected && (
-        <div className="rounded-xl bg-danger px-4 py-3 flex items-center gap-3">
-          <ShieldAlert className="w-5 h-5 text-danger-foreground shrink-0" />
-          <p className="text-sm font-semibold text-danger-foreground">
+        <div className="rounded-xl border-2 border-attention bg-attention-surface px-4 py-3 flex items-center gap-3">
+          <ShieldAlert className="w-5 h-5 text-attention-dark shrink-0" />
+          <p className="text-sm font-semibold text-attention-dark">
             Proteção interrompida — sessão desconectada
           </p>
         </div>

@@ -196,7 +196,7 @@ export default function StepCircleSetup({ onComplete }: Props) {
       </Card>
 
       {setupFamily.error && (
-        <p className="text-sm text-danger text-center">
+        <p className="text-sm text-attention-dark text-center">
           {setupFamily.error.message}
         </p>
       )}

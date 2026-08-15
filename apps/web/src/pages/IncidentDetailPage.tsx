@@ -6,8 +6,8 @@ import CrisisView from '@/features/incidents/components/CrisisView'
 import type { Severity, IncidentStatus, IncidentDelivery } from '@combinado/shared'
 
 const SEVERITY_STYLES: Record<Severity, string> = {
-  critical: 'bg-danger-surface text-danger-dark',
-  high: 'bg-danger-surface text-danger-dark',
+  critical: 'bg-attention-surface text-attention-dark',
+  high: 'bg-attention-surface text-attention-dark',
   medium: 'bg-attention-surface text-attention-dark',
   low: 'bg-brand-surface text-brand-dark',
 }
@@ -57,7 +57,7 @@ export default function IncidentDetailPage() {
   if (error || !incident) {
     return (
       <div className="p-6 flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <p className="text-danger text-sm">Incidente não encontrado.</p>
+        <p className="text-attention-dark text-sm">Incidente não encontrado.</p>
         <Link to="/alerts" className="text-brand text-sm mt-2 underline">
           Voltar aos alertas
         </Link>

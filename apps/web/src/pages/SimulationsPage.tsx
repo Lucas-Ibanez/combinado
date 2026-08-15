@@ -8,10 +8,10 @@ function StatusBadge({ status, correct }: { status: string; correct: boolean | n
     return <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-success-surface text-success-dark">Acertou</span>
   }
   if (status === 'responded' && !correct) {
-    return <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-danger-surface text-danger-dark">Errou</span>
+    return <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-attention-surface text-attention-dark">Errou</span>
   }
   if (status === 'sent') {
-    return <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-warning-surface text-warning-dark">Aguardando</span>
+    return <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-attention-surface text-attention-dark">Aguardando</span>
   }
   if (status === 'scheduled') {
     return <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-brand-surface text-brand">Agendada</span>
@@ -87,7 +87,7 @@ export default function SimulationsPage() {
                 <p className="text-xs text-text-muted">Acerto</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-warning">{stats.streak}</p>
+                <p className="text-2xl font-bold text-attention-dark">{stats.streak}</p>
                 <p className="text-xs text-text-muted">Sequência</p>
               </div>
             </div>
@@ -120,7 +120,7 @@ export default function SimulationsPage() {
         </Button>
 
         {startMutation.error && (
-          <p className="text-sm text-danger text-center">
+          <p className="text-sm text-attention-dark text-center">
             {startMutation.error.message}
           </p>
         )}

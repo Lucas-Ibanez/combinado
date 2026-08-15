@@ -116,7 +116,7 @@ export default function SettingsPage() {
             type="button"
             onClick={handleSignOutAll}
             disabled={signingOut}
-            className="w-full rounded-lg border border-danger text-danger px-4 py-2.5 text-sm font-medium hover:bg-danger/5 transition-colors disabled:opacity-50"
+            className="w-full rounded-lg border border-attention text-attention-dark px-4 py-2.5 text-sm font-medium hover:bg-attention-surface transition-colors disabled:opacity-50"
           >
             {signingOut ? 'Encerrando...' : 'Encerrar todas as sessoes'}
           </button>

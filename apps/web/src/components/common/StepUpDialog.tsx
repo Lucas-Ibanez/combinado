@@ -49,7 +49,7 @@ export default function StepUpDialog({
           />
 
           {error && (
-            <p className="text-sm text-danger bg-danger-surface rounded-lg px-3 py-2">
+            <p className="text-sm text-attention-dark bg-attention-surface rounded-lg px-3 py-2">
               {error}
             </p>
           )}

@@ -104,8 +104,8 @@ export default function StepTestNotification({ onComplete, onSkip }: Props) {
           </p>
 
           {permissionDenied && (
-            <div className="bg-danger-surface rounded-lg p-3">
-              <p className="text-sm text-danger-dark">
+            <div className="bg-attention-surface rounded-lg p-3">
+              <p className="text-sm text-attention-dark">
                 Permissão negada. Vá nas configurações do navegador para ativar notificações deste site.
               </p>
             </div>
@@ -114,7 +114,7 @@ export default function StepTestNotification({ onComplete, onSkip }: Props) {
       </Card>
 
       {subscribeMutation.error && !permissionDenied && (
-        <p className="text-sm text-danger text-center">
+        <p className="text-sm text-attention-dark text-center">
           {subscribeMutation.error.message}
         </p>
       )}

@@ -24,7 +24,7 @@ function stepStatus(delivery: IncidentDelivery): {
     return { label: 'Confirmado', color: 'bg-success' }
   }
   if (delivery.failure_reason) {
-    return { label: 'Falhou', color: 'bg-danger' }
+    return { label: 'Falhou', color: 'bg-attention' }
   }
   if (delivery.delivered_at) {
     return { label: 'Entregue', color: 'bg-brand' }
@@ -79,7 +79,7 @@ export default function DeliveryTimeline({
                     <span>Confirmado: {formatTime(d.acknowledged_at)}</span>
                   )}
                   {d.failure_reason && (
-                    <span className="text-danger">{d.failure_reason}</span>
+                    <span className="text-attention-dark">{d.failure_reason}</span>
                   )}
                 </div>
               </div>

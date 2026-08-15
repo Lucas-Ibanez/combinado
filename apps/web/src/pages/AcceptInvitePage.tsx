@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAcceptInvite } from '@/features/guardians'
 import { ShieldCheck, UserPlus, Loader2, AlertTriangle } from 'lucide-react'
+import EmotionalModeFrame from '@/components/common/EmotionalModeFrame'
 
 export default function AcceptInvitePage() {
   const navigate = useNavigate()
@@ -33,7 +34,7 @@ export default function AcceptInvitePage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface flex items-center justify-center p-4">
+    <EmotionalModeFrame mode="normal" className="min-h-screen flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-6">
         <div className="text-center space-y-2">
           <div className="w-14 h-14 rounded-2xl bg-brand-surface flex items-center justify-center mx-auto">
@@ -95,9 +96,9 @@ export default function AcceptInvitePage() {
           </div>
 
           {acceptMutation.error && (
-            <div className="rounded-xl bg-danger-surface border border-danger/20 px-4 py-3 flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 text-danger shrink-0 mt-0.5" />
-              <p className="text-sm text-danger">{acceptMutation.error.message}</p>
+            <div className="rounded-xl bg-attention-surface border border-attention/20 px-4 py-3 flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-attention-dark shrink-0 mt-0.5" />
+              <p className="text-sm text-attention-dark">{acceptMutation.error.message}</p>
             </div>
           )}
 
@@ -133,6 +134,6 @@ export default function AcceptInvitePage() {
           Ao aceitar, você poderá acompanhar incidentes e receber alertas de proteção como guardião secundário.
         </p>
       </div>
-    </div>
+    </EmotionalModeFrame>
   )
 }
