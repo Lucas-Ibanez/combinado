@@ -1,6 +1,6 @@
 import type { DeliveryChannel, Severity } from '@combinado/shared'
 import type { Logger } from '../../shared/logging/index.js'
-import { db } from '../../shared/db/index.js'
+import { orchestratorDb as db } from '../../shared/db/roles.js'
 import { dispatcher } from './dispatch.js'
 import { recordDispatchFailure } from './telemetry.js'
 import type { ProtocolResult } from '../channels/index.js'

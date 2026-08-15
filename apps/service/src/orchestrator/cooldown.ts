@@ -1,6 +1,6 @@
 import type { IncidentQueueMessage } from '@combinado/shared'
 import type { Logger } from '../shared/logging/index.js'
-import { db } from '../shared/db/index.js'
+import { orchestratorDb as db } from '../shared/db/roles.js'
 
 const COOLDOWN_WINDOW_MS = 5 * 60 * 1000
 

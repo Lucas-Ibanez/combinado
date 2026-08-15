@@ -33,6 +33,7 @@
     "test:sms": "tsx tests/sms-channel.smoke.ts",
     "test:guard": "tsx tests/channel-guard.smoke.ts",
     "test:envelope": "tsx tests/envelope.smoke.ts",
+    "test:least-privilege": "tsx tests/least-privilege.smoke.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

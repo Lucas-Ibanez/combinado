@@ -1,6 +1,6 @@
 import type { Logger } from '../shared/logging/index.js'
 import { queue } from '../shared/queue/index.js'
-import { db } from '../shared/db/index.js'
+import { simulationDb as db } from '../shared/db/roles.js'
 import type { OfficialSessionHandle } from '../orchestrator/channels/official-session.js'
 import { buildSimulationMessage } from './messages.js'
 

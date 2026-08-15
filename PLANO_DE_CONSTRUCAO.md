@@ -952,7 +952,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T11.2 — Menor privilégio entre os papéis
+### - [x] T11.2 — Menor privilégio entre os papéis
 **O que será feito:** garantir na prática que: o Gateway **não** usa a `service_role` geral; o Risk Worker **não** acessa chaves; o LLM **não** vê número completo nem dado de auth; o Orchestrator **só** executa política; o servidor HTTP de webhooks é isolado.
 
 **Como garantir que foi feito corretamente:** cada papel só consegue tocar no que precisa (testar que, ex., o Risk Worker não tem acesso ao `vault_baileys`).

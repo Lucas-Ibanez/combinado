@@ -1,6 +1,6 @@
 import type { IncidentQueueMessage, Severity } from '@combinado/shared'
 import type { Logger } from '../shared/logging/index.js'
-import { db } from '../shared/db/index.js'
+import { orchestratorDb as db } from '../shared/db/roles.js'
 
 const SEVERITY_RANK: Record<Severity, number> = { low: 0, medium: 1, high: 2, critical: 3 }
 

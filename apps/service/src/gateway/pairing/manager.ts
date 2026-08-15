@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises'
 import qrcode from 'qrcode-terminal'
-import { db } from '../../shared/db/index.js'
+import { gatewayDb as db } from '../../shared/db/roles.js'
 import type { Logger } from '../../shared/logging/index.js'
 import {
   startBaileysConnection,

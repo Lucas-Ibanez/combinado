@@ -1,7 +1,7 @@
 import type { WASocket } from '@whiskeysockets/baileys'
 import type { Logger } from '../shared/logging/index.js'
 import type { OfficialSessionHandle } from '../orchestrator/channels/official-session.js'
-import { db } from '../shared/db/index.js'
+import { verificationDb as db } from '../shared/db/roles.js'
 import { assessText } from './assess.js'
 
 function jidToPhone(jid: string): string {

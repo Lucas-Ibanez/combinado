@@ -1,5 +1,5 @@
 import type { Logger } from '../../shared/logging/index.js'
-import { db } from '../../shared/db/index.js'
+import { orchestratorDb as db } from '../../shared/db/roles.js'
 
 // ── Timeline: histórico completo de tentativas de um incidente ──────────────
 

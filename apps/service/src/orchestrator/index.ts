@@ -9,7 +9,7 @@
 // =============================================================================
 import type { IncidentQueueMessage } from '@combinado/shared'
 import type { Logger } from '../shared/logging/index.js'
-import { db } from '../shared/db/index.js'
+import { orchestratorDb as db } from '../shared/db/roles.js'
 import { queue } from '../shared/queue/index.js'
 import type { QueueMessage } from '../shared/queue/types.js'
 import { upsertIncident } from './incidents.js'
