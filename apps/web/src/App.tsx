@@ -12,6 +12,7 @@ import LoginPage from '@/pages/LoginPage'
 import MfaEnrollPage from '@/pages/MfaEnrollPage'
 import MfaVerifyPage from '@/pages/MfaVerifyPage'
 import OnboardingPage from '@/pages/OnboardingPage'
+import SimulationsPage from '@/pages/SimulationsPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,6 +38,7 @@ export default function App() {
               <Route path="alerts" element={<IncidentsPage />} />
               <Route path="alerts/:id" element={<IncidentDetailPage />} />
               <Route path="protection" element={<ProtectionPage />} />
+              <Route path="simulations" element={<SimulationsPage />} />
               <Route path="chat" element={<ChatPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>

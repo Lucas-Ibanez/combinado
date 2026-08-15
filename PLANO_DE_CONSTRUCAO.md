@@ -901,7 +901,7 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T10.2 — Simulações periódicas (o ensaio do hábito)
+### - [x] T10.2 — Simulações periódicas (o ensaio do hábito)
 **O que será feito:** agendamento e disparo das simulações via Command API (com cooldown/limite), envio pelo WhatsApp, registro do resultado e um painel de **progresso do hábito** para o guardião.
 
 **Como garantir que foi feito corretamente:** uma simulação chega ao protegido e o resultado atualiza o progresso no app.

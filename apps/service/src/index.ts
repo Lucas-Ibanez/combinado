@@ -27,6 +27,8 @@ import { startHttpServer } from './http/index.js'
 import { startOfficialSession, WhatsAppChannel, ProtocolSender, CallChannel, PushChannel, SmsChannel } from './orchestrator/channels/index.js'
 import { registerChannel } from './orchestrator/ladder/dispatch.js'
 import { registerProtocolSender } from './orchestrator/ladder/index.js'
+import { startSimulationWorker } from './simulation/index.js'
+import { attachSimulationResponseHandler } from './simulation/response-handler.js'
 
 const log = createLogger('bootstrap')
 
@@ -70,11 +72,13 @@ async function main() {
 
   // Ordem: consumidores primeiro, produtor depois.
   const orchestrator = await startOrchestrator(createLogger('orchestrator'))
+  const simulationWorker = await startSimulationWorker(officialSession, createLogger('simulation'))
+  attachSimulationResponseHandler(officialSession, createLogger('simulation-response'))
   const risk = await startRisk(createLogger('risk'))
   const gateway = await startGateway(createLogger('gateway'))
   const http = startHttpServer(createLogger('http'))
 
-  log.info('serviço no ar', { roles: ['gateway', 'risk', 'orchestrator', 'http', 'official-wa'] })
+  log.info('serviço no ar', { roles: ['gateway', 'risk', 'orchestrator', 'simulation', 'http', 'official-wa'] })
 
   async function shutdown(signal: string) {
     log.info('shutdown iniciado', { signal })
@@ -84,6 +88,7 @@ async function main() {
       await http.stop()
       await gateway.stop()
       await risk.stop()
+      await simulationWorker.stop()
       await orchestrator.stop()
       await officialSession.stop()
       log.info('shutdown concluído')
