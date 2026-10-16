@@ -2,6 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import EmotionalModeFrame from '@/components/common/EmotionalModeFrame'
+import { CircleAlert } from 'lucide-react'
+import { SystemStateNotice } from '@/components/common/SystemStatus'
 
 export default function MfaVerifyPage() {
   const navigate = useNavigate()
@@ -57,7 +60,7 @@ export default function MfaVerifyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-brand flex flex-col items-center justify-center p-8">
+    <EmotionalModeFrame mode="normal" className="min-h-screen flex flex-col items-center justify-center p-8">
       <div className="bg-surface rounded-2xl shadow-lg p-8 w-full max-w-sm">
         <h1 className="text-xl font-bold text-brand text-center mb-1">
           Verificação em duas etapas
@@ -87,9 +90,13 @@ export default function MfaVerifyPage() {
           </div>
 
           {error && (
-            <p className="text-sm text-danger bg-danger-surface rounded-lg px-3 py-2">
-              {error}
-            </p>
+            <SystemStateNotice
+              icon={CircleAlert}
+              title="Código não confirmado"
+              description={error}
+              tone="attention"
+              live="assertive"
+            />
           )}
 
           <button
@@ -113,6 +120,6 @@ export default function MfaVerifyPage() {
           Se perder o acesso ao autenticador, entre em contato com o suporte para recuperar sua conta.
         </p>
       </div>
-    </div>
+    </EmotionalModeFrame>
   )
 }

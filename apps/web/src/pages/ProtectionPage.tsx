@@ -17,72 +17,42 @@ import {
   Bell,
   User,
   UserPlus,
-  ExternalLink,
   Copy,
   Check,
+  BellOff,
+  PhoneOff,
+  Star,
+  UserRound,
+  UserX,
+  CircleAlert,
 } from 'lucide-react'
 import { useState, useCallback } from 'react'
 import { useStepUp } from '@/hooks/useStepUp'
 import StepUpDialog from '@/components/common/StepUpDialog'
+import {
+  SystemStateNotice,
+  SystemStatusBadge,
+  type SystemStatusTone,
+} from '@/components/common/SystemStatus'
 
 const STATUS_CONFIG: Record<
   BaileysStatus,
-  { label: string; color: string; icon: typeof Wifi; urgent: boolean }
+  { label: string; tone: SystemStatusTone; icon: typeof Wifi; urgent: boolean }
 > = {
-  paired: { label: 'Conectado', color: 'text-success', icon: Wifi, urgent: false },
-  reconnecting: { label: 'Reconectando...', color: 'text-attention', icon: Loader2, urgent: false },
-  pairing: { label: 'Pareando...', color: 'text-attention', icon: Loader2, urgent: false },
-  disconnected: { label: 'Desconectado', color: 'text-danger', icon: WifiOff, urgent: true },
-  unpaired: { label: 'Não vinculado', color: 'text-text-muted', icon: WifiOff, urgent: false },
+  paired: { label: 'Conectado', tone: 'normal', icon: Wifi, urgent: false },
+  reconnecting: { label: 'Reconectando...', tone: 'attention', icon: Loader2, urgent: false },
+  pairing: { label: 'Pareando...', tone: 'attention', icon: Loader2, urgent: false },
+  disconnected: { label: 'Desconectado', tone: 'attention', icon: WifiOff, urgent: true },
+  unpaired: { label: 'Não vinculado', tone: 'neutral', icon: WifiOff, urgent: false },
 }
 
-function PanelLinkButton({ token, name }: { token: string; name: string }) {
-  const [copied, setCopied] = useState(false)
-  const panelUrl = `${window.location.origin}/protected?token=${token}`
-
-  async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(panelUrl)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      // fallback
-    }
-  }
-
-  return (
-    <div className="mt-3 rounded-lg bg-brand-surface px-3 py-2.5">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 text-xs text-brand">
-          <ExternalLink className="w-3.5 h-3.5" />
-          <span className="font-medium">Painel do Protegido</span>
-        </div>
-        <button
-          type="button"
-          onClick={handleCopy}
-          className="flex items-center gap-1 text-xs text-brand hover:text-brand/80 transition-colors"
-        >
-          {copied ? (
-            <>
-              <Check className="w-3.5 h-3.5" />
-              Copiado
-            </>
-          ) : (
-            <>
-              <Copy className="w-3.5 h-3.5" />
-              Copiar link
-            </>
-          )}
-        </button>
-      </div>
-      <p className="text-xs text-text-muted mt-1">
-        Envie este link para {name} — permite ver guardiões e revogar acesso de forma independente.
-      </p>
-    </div>
-  )
-}
-
-function SessionCard({ person }: { person: ProtectedPersonStatus }) {
+function SessionCard({
+  person,
+  onRetry,
+}: {
+  person: ProtectedPersonStatus
+  onRetry: () => void
+}) {
   const status = person.baileys_status as BaileysStatus
   const config = STATUS_CONFIG[status] ?? STATUS_CONFIG.unpaired
   const Icon = config.icon
@@ -92,7 +62,7 @@ function SessionCard({ person }: { person: ProtectedPersonStatus }) {
     <div
       className={`rounded-xl border p-4 ${
         isDisconnected
-          ? 'border-danger bg-danger-surface'
+          ? 'border-attention bg-attention-surface'
           : 'border-border bg-surface'
       }`}
     >
@@ -103,42 +73,35 @@ function SessionCard({ person }: { person: ProtectedPersonStatus }) {
             <p className="text-xs text-text-muted mt-0.5">{person.phone}</p>
           )}
         </div>
-        <div className={`flex items-center gap-1.5 ${config.color}`}>
-          <Icon className={`w-4 h-4 ${status === 'reconnecting' || status === 'pairing' ? 'animate-spin' : ''}`} />
-          <span className="text-xs font-medium whitespace-nowrap">{config.label}</span>
-        </div>
+        <SystemStatusBadge
+          icon={Icon}
+          label={config.label}
+          tone={config.tone}
+          className={status === 'reconnecting' || status === 'pairing' ? '[&>svg]:animate-spin' : undefined}
+        />
       </div>
 
       {isDisconnected && (
-        <div className="mt-3 rounded-lg bg-danger/10 px-3 py-2">
-          <p className="text-sm font-semibold text-danger">
-            Proteção interrompida
-          </p>
-          <p className="text-xs text-danger-dark mt-0.5">
-            As mensagens deste protegido não estão sendo monitoradas. Verifique a conexão do serviço.
-          </p>
-        </div>
+        <SystemStateNotice
+          icon={WifiOff}
+          title="Proteção interrompida"
+          description="As mensagens deste protegido não estão sendo monitoradas. O serviço tenta reconectar automaticamente."
+          tone="attention"
+          actionLabel="Verificar conexão novamente"
+          onAction={onRetry}
+          live="assertive"
+          className="mt-3"
+        />
       )}
 
       <div className="flex items-center gap-4 mt-3 text-xs text-text-muted">
-        <span className="flex items-center gap-1">
-          {person.opted_in ? (
-            <>
-              <ShieldCheck className="w-3.5 h-3.5 text-success" />
-              Opt-in ativo
-            </>
-          ) : (
-            <>
-              <ShieldOff className="w-3.5 h-3.5 text-text-muted" />
-              Sem opt-in
-            </>
-          )}
-        </span>
+        <SystemStatusBadge
+          icon={person.opted_in ? ShieldCheck : ShieldOff}
+          label={person.opted_in ? 'Consentimento ativo' : 'Sem consentimento'}
+          tone={person.opted_in ? 'normal' : 'neutral'}
+        />
       </div>
 
-      {person.panel_token && (
-        <PanelLinkButton token={person.panel_token} name={person.display_name} />
-      )}
     </div>
   )
 }
@@ -160,24 +123,24 @@ function GuardianCard({ guardian }: { guardian: GuardianInfo }) {
             )}
           </div>
         </div>
-        <span className={`text-xs font-medium rounded-full px-2 py-0.5 ${
-          guardian.is_primary
-            ? 'text-brand bg-brand-surface'
-            : 'text-text-muted bg-surface-elevated'
-        }`}>
-          {guardian.is_primary ? 'Principal' : 'Secundário'}
-        </span>
+        <SystemStatusBadge
+          icon={guardian.is_primary ? Star : UserRound}
+          label={guardian.is_primary ? 'Guardião principal' : 'Guardião secundário'}
+          tone={guardian.is_primary ? 'normal' : 'neutral'}
+        />
       </div>
 
       <div className="flex items-center gap-4 mt-3 text-xs text-text-muted">
-        <span className="flex items-center gap-1">
-          <Phone className="w-3.5 h-3.5" />
-          {guardian.phone ? 'SMS/Ligação' : 'Sem telefone'}
-        </span>
-        <span className="flex items-center gap-1">
-          <Bell className="w-3.5 h-3.5" />
-          {hasPush ? 'Push ativo' : 'Push inativo'}
-        </span>
+        <SystemStatusBadge
+          icon={guardian.phone ? Phone : PhoneOff}
+          label={guardian.phone ? 'SMS e ligação ativos' : 'Sem telefone'}
+          tone={guardian.phone ? 'normal' : 'neutral'}
+        />
+        <SystemStatusBadge
+          icon={hasPush ? Bell : BellOff}
+          label={hasPush ? 'Push ativo' : 'Push inativo'}
+          tone={hasPush ? 'normal' : 'neutral'}
+        />
       </div>
     </div>
   )
@@ -282,7 +245,15 @@ function InviteSection({
         )}
 
         {createInvite.error && (
-          <p className="text-xs text-danger">{createInvite.error.message}</p>
+          <SystemStateNotice
+            icon={CircleAlert}
+            title="Não foi possível gerar o convite"
+            description={createInvite.error.message}
+            tone="attention"
+            actionLabel="Tentar novamente"
+            onAction={() => void handleInvite()}
+            live="assertive"
+          />
         )}
       </div>
     </section>
@@ -290,8 +261,18 @@ function InviteSection({
 }
 
 export default function ProtectionPage() {
-  const { data: persons, isLoading: loadingPersons, error: errorPersons } = useProtectedPersons()
-  const { data: guardians, isLoading: loadingGuardians, error: errorGuardians } = useGuardians()
+  const {
+    data: persons,
+    isLoading: loadingPersons,
+    error: errorPersons,
+    refetch: refetchPersons,
+  } = useProtectedPersons()
+  const {
+    data: guardians,
+    isLoading: loadingGuardians,
+    error: errorGuardians,
+    refetch: refetchGuardians,
+  } = useGuardians()
   const stepUp = useStepUp()
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null)
 
@@ -319,11 +300,17 @@ export default function ProtectionPage() {
 
   const isLoading = loadingPersons || loadingGuardians
   const error = errorPersons || errorGuardians
+  const refreshProtection = () => {
+    void Promise.all([refetchPersons(), refetchGuardians()])
+  }
 
   if (isLoading) {
     return (
       <div className="p-6 flex items-center justify-center min-h-[60vh]">
-        <p className="text-text-muted text-sm">Carregando estado da proteção...</p>
+        <p className="flex items-center gap-2 text-text-muted text-sm" role="status">
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          Carregando estado da proteção...
+        </p>
       </div>
     )
   }
@@ -331,8 +318,16 @@ export default function ProtectionPage() {
   if (error) {
     return (
       <div className="p-6 flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <p className="text-danger text-sm">Erro ao carregar estado da proteção.</p>
-        <p className="text-text-muted text-xs mt-1">Tente novamente em instantes.</p>
+        <SystemStateNotice
+          icon={ShieldAlert}
+          title="Não foi possível verificar a proteção"
+          description="Verifique sua conexão e tente carregar os estados novamente."
+          tone="attention"
+          actionLabel="Tentar novamente"
+          onAction={refreshProtection}
+          live="assertive"
+          className="w-full max-w-sm text-left"
+        />
       </div>
     )
   }
@@ -344,12 +339,15 @@ export default function ProtectionPage() {
   return (
     <div className="p-4 pb-6 space-y-6">
       {hasDisconnected && (
-        <div className="rounded-xl bg-danger px-4 py-3 flex items-center gap-3">
-          <ShieldAlert className="w-5 h-5 text-danger-foreground shrink-0" />
-          <p className="text-sm font-semibold text-danger-foreground">
-            Proteção interrompida — sessão desconectada
-          </p>
-        </div>
+        <SystemStateNotice
+          icon={ShieldAlert}
+          title="Proteção interrompida — sessão desconectada"
+          description="Há mensagens que não estão sendo monitoradas neste momento."
+          tone="attention"
+          actionLabel="Verificar todas as conexões"
+          onAction={refreshProtection}
+          live="assertive"
+        />
       )}
 
       <section>
@@ -357,13 +355,16 @@ export default function ProtectionPage() {
           Protegidos ({persons?.length ?? 0})
         </h2>
         {(!persons || persons.length === 0) ? (
-          <p className="text-sm text-text-muted text-center py-4">
-            Nenhum protegido cadastrado.
-          </p>
+          <SystemStateNotice
+            icon={UserX}
+            title="Nenhum protegido cadastrado"
+            description="Complete a configuração inicial para ativar a proteção."
+            tone="neutral"
+          />
         ) : (
           <div className="space-y-3">
             {persons.map((person) => (
-              <SessionCard key={person.id} person={person} />
+              <SessionCard key={person.id} person={person} onRetry={refreshProtection} />
             ))}
           </div>
         )}
@@ -386,9 +387,12 @@ export default function ProtectionPage() {
           Guardiões ({guardians?.length ?? 0})
         </h2>
         {(!guardians || guardians.length === 0) ? (
-          <p className="text-sm text-text-muted text-center py-4">
-            Nenhum guardião cadastrado.
-          </p>
+          <SystemStateNotice
+            icon={UserX}
+            title="Nenhum guardião cadastrado"
+            description="Use o convite acima para adicionar uma pessoa de confiança."
+            tone="neutral"
+          />
         ) : (
           <div className="space-y-3">
             {guardians.map((guardian) => (

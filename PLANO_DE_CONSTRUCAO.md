@@ -1003,14 +1003,14 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T12.1 — Consolidar os dois modos emocionais
+### - [x] T12.1 — Consolidar os dois modos emocionais
 **O que será feito:** modo normal calmo e discreto; modo incidente diretivo e enfático. Garantir a transição clara entre eles e que o vermelho só aparece na crise.
 
 **Como garantir que foi feito corretamente:** os dois modos estão visualmente distintos e coerentes entre si.
 
 ---
 
-### - [ ] T12.2 — Nunca só cor (WCAG)
+### - [x] T12.2 — Nunca só cor (WCAG)
 **O que será feito:** todo estado combina **texto + ícone + forma + cor + ação** ("proteção ativa" com ícone de confirmação; "desconectado" com plugue interrompido).
 
 **Como garantir que foi feito corretamente:** em tons de cinza (simulando daltonismo), ainda se distingue cada estado.
@@ -1019,14 +1019,14 @@ cd apps/web && pnpm add @combinado/shared --workspace && cd ../..
 
 ---
 
-### - [ ] T12.3 — Vaul para drawers e anti-toque acidental
+### - [x] T12.3 — Vaul para drawers e anti-toque acidental
 **O que será feito:** usar o Vaul (instalado em T0.7) para drawers nativos no mobile. Ações críticas (acionar/bloquear) com gesto deliberado, tipo "deslize para confirmar", evitando disparo no bolso.
 
 **Como garantir que foi feito corretamente:** os drawers se comportam bem no celular e a ação crítica exige um gesto deliberado (não um toque simples).
 
 ---
 
-### - [ ] T12.4 — Acessibilidade e instalação PWA
+### - [x] T12.4 — Acessibilidade e instalação PWA
 **O que será feito:** contraste AA, alvos de toque ~44×44px, zoom de texto sem quebra. Finalizar manifest e service worker; incluir o **teste de notificação** no onboarding para confirmar que a escada chega ao aparelho do guardião.
 
 **Como garantir que foi feito corretamente:** o app instala na tela inicial e o teste de push confirma a entrega.

@@ -2,6 +2,9 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import EmotionalModeFrame from '@/components/common/EmotionalModeFrame'
+import { CircleAlert, Loader2 } from 'lucide-react'
+import { SystemStateNotice } from '@/components/common/SystemStatus'
 
 export default function MfaEnrollPage() {
   const navigate = useNavigate()
@@ -67,7 +70,7 @@ export default function MfaEnrollPage() {
   }
 
   return (
-    <div className="min-h-screen bg-brand flex flex-col items-center justify-center p-8">
+    <EmotionalModeFrame mode="normal" className="min-h-screen flex flex-col items-center justify-center p-8">
       <div className="bg-surface rounded-2xl shadow-lg p-8 w-full max-w-sm">
         <h1 className="text-xl font-bold text-brand text-center mb-1">
           Ativar verificação em duas etapas
@@ -125,9 +128,13 @@ export default function MfaEnrollPage() {
               </div>
 
               {error && (
-                <p className="text-sm text-danger bg-danger-surface rounded-lg px-3 py-2">
-                  {error}
-                </p>
+                <SystemStateNotice
+                  icon={CircleAlert}
+                  title="Não foi possível confirmar o código"
+                  description={error}
+                  tone="attention"
+                  live="assertive"
+                />
               )}
 
               <button
@@ -144,13 +151,22 @@ export default function MfaEnrollPage() {
             </p>
           </>
         ) : error ? (
-          <p className="text-sm text-danger bg-danger-surface rounded-lg px-3 py-2">
-            {error}
-          </p>
+          <SystemStateNotice
+            icon={CircleAlert}
+            title="Não foi possível gerar o QR code"
+            description={error}
+            tone="attention"
+            actionLabel="Recarregar página"
+            onAction={() => window.location.reload()}
+            live="assertive"
+          />
         ) : (
-          <p className="text-text-muted text-center text-sm">Gerando QR code...</p>
+          <p className="flex items-center justify-center gap-2 text-text-muted text-center text-sm" role="status">
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            Gerando QR code...
+          </p>
         )}
       </div>
-    </div>
+    </EmotionalModeFrame>
   )
 }

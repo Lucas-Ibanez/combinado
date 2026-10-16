@@ -1,15 +1,19 @@
 import { Link } from 'react-router-dom'
 import type { Incident, IncidentStatus, Severity } from '@combinado/shared'
+import {
+  BellRing,
+  CheckCircle2,
+  CircleAlert,
+  Clock3,
+  Info,
+  Radio,
+  ShieldAlert,
+  UserRoundPlus,
+} from 'lucide-react'
+import { SystemStatusBadge, type SystemStatusTone } from '@/components/common/SystemStatus'
 
 interface IncidentWithPerson extends Incident {
   protected_persons: { display_name: string } | null
-}
-
-const SEVERITY_STYLES: Record<Severity, string> = {
-  critical: 'bg-danger-surface text-danger-dark',
-  high: 'bg-danger-surface text-danger-dark',
-  medium: 'bg-attention-surface text-attention-dark',
-  low: 'bg-brand-surface text-brand-dark',
 }
 
 const SEVERITY_LABELS: Record<Severity, string> = {
@@ -17,6 +21,18 @@ const SEVERITY_LABELS: Record<Severity, string> = {
   high: 'Alto',
   medium: 'Médio',
   low: 'Baixo',
+}
+
+const STATUS_CONFIG: Record<
+  IncidentStatus,
+  { icon: typeof ShieldAlert; tone: SystemStatusTone }
+> = {
+  open: { icon: ShieldAlert, tone: 'incident' },
+  notifying: { icon: Radio, tone: 'incident' },
+  escalated: { icon: UserRoundPlus, tone: 'incident' },
+  acknowledged: { icon: CheckCircle2, tone: 'normal' },
+  expired: { icon: Clock3, tone: 'neutral' },
+  closed: { icon: CheckCircle2, tone: 'normal' },
 }
 
 const STATUS_LABELS: Record<IncidentStatus, string> = {
@@ -60,15 +76,23 @@ export default function IncidentCard({ incident }: { incident: IncidentWithPerso
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span
-              className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${SEVERITY_STYLES[severity]}`}
-            >
-              {SEVERITY_LABELS[severity]}
-            </span>
-            <span className="text-xs text-text-muted">
-              {STATUS_LABELS[status]}
-            </span>
+          <div className="flex flex-wrap items-center gap-2 mb-1">
+            <SystemStatusBadge
+              icon={severity === 'low' ? Info : CircleAlert}
+              label={`Risco ${SEVERITY_LABELS[severity].toLowerCase()}`}
+              tone={
+                active && (severity === 'critical' || severity === 'high')
+                  ? 'incident'
+                  : severity === 'low'
+                    ? 'normal'
+                    : 'attention'
+              }
+            />
+            <SystemStatusBadge
+              icon={STATUS_CONFIG[status]?.icon ?? BellRing}
+              label={STATUS_LABELS[status]}
+              tone={STATUS_CONFIG[status]?.tone ?? 'neutral'}
+            />
           </div>
           <p className="text-sm font-semibold text-text truncate">
             {personName}

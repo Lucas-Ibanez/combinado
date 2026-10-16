@@ -2,6 +2,22 @@ import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import EmotionalModeFrame from '@/components/common/EmotionalModeFrame'
+import CriticalActionDrawer from '@/components/common/CriticalActionDrawer'
+import {
+  BellRing,
+  CheckCircle2,
+  CircleAlert,
+  Clock3,
+  Info,
+  Link2Off,
+  Loader2,
+  ShieldCheck,
+  Star,
+  UserRound,
+  UserX,
+} from 'lucide-react'
+import { SystemStateNotice, SystemStatusBadge } from '@/components/common/SystemStatus'
 import {
   useProtectedPanel,
   useRevokeGuardian,
@@ -10,12 +26,6 @@ import {
 } from '@/features/protected-panel'
 
 function SeverityBadge({ severity }: { severity: string }) {
-  const styles: Record<string, string> = {
-    critical: 'bg-danger-surface text-danger-dark',
-    high: 'bg-danger-surface text-danger-dark',
-    medium: 'bg-warning-surface text-warning-dark',
-    low: 'bg-brand-surface text-brand',
-  }
   const labels: Record<string, string> = {
     critical: 'Crítico',
     high: 'Alto',
@@ -23,9 +33,11 @@ function SeverityBadge({ severity }: { severity: string }) {
     low: 'Baixo',
   }
   return (
-    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${styles[severity] ?? 'bg-neutral-100 text-text-muted'}`}>
-      {labels[severity] ?? severity}
-    </span>
+    <SystemStatusBadge
+      icon={severity === 'low' ? Info : CircleAlert}
+      label={`Risco ${(labels[severity] ?? severity).toLowerCase()}`}
+      tone={severity === 'low' ? 'normal' : 'attention'}
+    />
   )
 }
 
@@ -38,7 +50,16 @@ function StatusLabel({ status }: { status: string }) {
     expired: 'Expirado',
     closed: 'Encerrado',
   }
-  return <span className="text-xs text-text-muted">{labels[status] ?? status}</span>
+  const completed = status === 'acknowledged' || status === 'closed'
+  const pending = status === 'expired'
+
+  return (
+    <SystemStatusBadge
+      icon={completed ? CheckCircle2 : pending ? Clock3 : BellRing}
+      label={labels[status] ?? status}
+      tone={completed ? 'normal' : pending ? 'neutral' : 'attention'}
+    />
+  )
 }
 
 function formatDate(iso: string | null): string {
@@ -61,7 +82,7 @@ function GuardianCard({
   onRevoke: (linkId: string) => void
   revoking: boolean
 }) {
-  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   return (
     <Card>
@@ -71,9 +92,11 @@ function GuardianCard({
             <p className="text-sm font-medium text-text">{guardian.display_name}</p>
             <p className="text-xs text-text-muted">{guardian.phone}</p>
             <div className="flex gap-2 mt-1">
-              <span className="text-xs px-2 py-0.5 rounded-full bg-brand-surface text-brand">
-                {guardian.role === 'primary' ? 'Principal' : 'Secundário'}
-              </span>
+              <SystemStatusBadge
+                icon={guardian.role === 'primary' ? Star : UserRound}
+                label={guardian.role === 'primary' ? 'Guardiao principal' : 'Guardiao secundario'}
+                tone={guardian.role === 'primary' ? 'normal' : 'neutral'}
+              />
               <span className="text-xs text-text-muted">
                 Desde {formatDate(guardian.linked_at)}
               </span>
@@ -81,45 +104,25 @@ function GuardianCard({
           </div>
         </div>
 
-        {!confirmOpen ? (
-          <Button
-            variant="destructive"
-            size="sm"
-            className="w-full mt-3"
-            onClick={() => setConfirmOpen(true)}
-          >
-            Revogar acesso
-          </Button>
-        ) : (
-          <div className="mt-3 space-y-2">
-            <div className="bg-danger-surface rounded-lg p-3">
-              <p className="text-sm text-danger-dark">
-                Tem certeza? <strong>{guardian.display_name}</strong> perderá acesso
-                à sua proteção e não poderá mais monitorar mensagens nem receber alertas.
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="destructive"
-                size="sm"
-                className="flex-1"
-                onClick={() => onRevoke(guardian.link_id)}
-                disabled={revoking}
-              >
-                {revoking ? 'Revogando...' : 'Sim, revogar'}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1"
-                onClick={() => setConfirmOpen(false)}
-                disabled={revoking}
-              >
-                Cancelar
-              </Button>
-            </div>
-          </div>
-        )}
+        <Button
+          variant="destructive"
+          size="sm"
+          className="w-full mt-3"
+          onClick={() => setDrawerOpen(true)}
+        >
+          Revogar acesso
+        </Button>
+
+        <CriticalActionDrawer
+          open={drawerOpen}
+          onOpenChange={setDrawerOpen}
+          title={`Revogar acesso de ${guardian.display_name}?`}
+          description="Essa pessoa perdera acesso a sua protecao e nao podera mais monitorar mensagens nem receber alertas."
+          confirmLabel="Deslize para revogar"
+          onConfirm={() => onRevoke(guardian.link_id)}
+          disabled={revoking}
+          tone="danger"
+        />
       </CardContent>
     </Card>
   )
@@ -150,54 +153,58 @@ export default function ProtectedPanelPage() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
 
-  const { data, isLoading, error } = useProtectedPanel(token)
+  const { data, isLoading, error, refetch } = useProtectedPanel(token)
   const revokeMutation = useRevokeGuardian(token)
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-surface flex items-center justify-center p-6">
-        <Card className="max-w-sm w-full">
-          <CardContent className="pt-6 text-center">
-            <p className="text-sm text-danger">
-              Link inválido. Use o link enviado pelo Combinado no seu WhatsApp.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <EmotionalModeFrame mode="normal" className="min-h-screen flex items-center justify-center p-6">
+        <SystemStateNotice
+          icon={Link2Off}
+          title="Link inválido"
+          description="Peça ao seu familiar um novo link do Combinado pelo WhatsApp."
+          tone="attention"
+          live="assertive"
+          className="max-w-sm"
+        />
+      </EmotionalModeFrame>
     )
   }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-surface flex items-center justify-center">
-        <p className="text-sm text-text-muted">Carregando seu painel...</p>
-      </div>
+      <EmotionalModeFrame mode="normal" className="min-h-screen flex items-center justify-center">
+        <p className="flex items-center gap-2 text-sm text-text-muted" role="status">
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          Carregando seu painel...
+        </p>
+      </EmotionalModeFrame>
     )
   }
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-surface flex items-center justify-center p-6">
-        <Card className="max-w-sm w-full">
-          <CardContent className="pt-6 text-center space-y-3">
-            <p className="text-sm text-danger">
-              {(error as Error)?.message ?? 'Não foi possível carregar o painel.'}
-            </p>
-            <p className="text-xs text-text-muted">
-              Se o problema persistir, peça ao seu familiar para enviar um novo link.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <EmotionalModeFrame mode="normal" className="min-h-screen flex items-center justify-center p-6">
+        <SystemStateNotice
+          icon={CircleAlert}
+          title="Não foi possível carregar o painel"
+          description={(error as Error)?.message ?? 'Verifique sua conexão ou peça ao seu familiar um novo link.'}
+          tone="attention"
+          actionLabel="Tentar novamente"
+          onAction={() => void refetch()}
+          live="assertive"
+          className="max-w-sm"
+        />
+      </EmotionalModeFrame>
     )
   }
 
   return (
-    <div className="min-h-screen bg-surface">
+    <EmotionalModeFrame mode="normal" className="min-h-screen">
       <div className="max-w-lg mx-auto p-6 space-y-6">
         <div className="text-center">
           <div className="w-14 h-14 rounded-full bg-brand-surface flex items-center justify-center mx-auto mb-3">
-            <span className="text-2xl">&#x1F6E1;</span>
+            <ShieldCheck className="h-7 w-7 text-brand" aria-hidden="true" />
           </div>
           <h1 className="text-xl font-bold text-text">
             Olá, {data.display_name}
@@ -221,13 +228,12 @@ export default function ProtectedPanelPage() {
             Seus Guardiões ({data.guardians.length})
           </h2>
           {data.guardians.length === 0 ? (
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <p className="text-sm text-text-muted">
-                  Nenhum guardião vinculado no momento.
-                </p>
-              </CardContent>
-            </Card>
+            <SystemStateNotice
+              icon={UserX}
+              title="Nenhum guardião vinculado"
+              description="Peça a uma pessoa de confiança para configurar sua proteção."
+              tone="neutral"
+            />
           ) : (
             <div className="space-y-3">
               {data.guardians.map((g) => (
@@ -241,14 +247,23 @@ export default function ProtectedPanelPage() {
             </div>
           )}
           {revokeMutation.isSuccess && (
-            <p className="text-sm text-success text-center mt-3">
-              Guardião revogado com sucesso.
-            </p>
+            <SystemStateNotice
+              icon={CheckCircle2}
+              title="Acesso revogado"
+              description="Esse guardião não pode mais acompanhar sua proteção."
+              tone="normal"
+              className="mt-3"
+            />
           )}
           {revokeMutation.error && (
-            <p className="text-sm text-danger text-center mt-3">
-              {revokeMutation.error.message}
-            </p>
+            <SystemStateNotice
+              icon={CircleAlert}
+              title="Não foi possível revogar o acesso"
+              description={revokeMutation.error.message}
+              tone="attention"
+              live="assertive"
+              className="mt-3"
+            />
           )}
         </div>
 
@@ -257,13 +272,12 @@ export default function ProtectedPanelPage() {
             Intervenções Recentes
           </h2>
           {data.incidents.length === 0 ? (
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <p className="text-sm text-text-muted">
-                  Nenhuma intervenção registrada. Isso é bom!
-                </p>
-              </CardContent>
-            </Card>
+            <SystemStateNotice
+              icon={ShieldCheck}
+              title="Nenhuma intervenção registrada"
+              description="Não houve alertas que exigissem ação da família."
+              tone="normal"
+            />
           ) : (
             <Card>
               <CardHeader className="pb-2">
@@ -312,6 +326,6 @@ export default function ProtectedPanelPage() {
           Este link é pessoal. Não compartilhe com terceiros.
         </p>
       </div>
-    </div>
+    </EmotionalModeFrame>
   )
 }

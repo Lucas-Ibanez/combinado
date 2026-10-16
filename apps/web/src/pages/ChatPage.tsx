@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { useCheckMessage, type CheckMessageResult } from '@/features/chat'
+import { CheckCircle2, CircleAlert, ShieldAlert } from 'lucide-react'
+import { SystemStateNotice, SystemStatusBadge } from '@/components/common/SystemStatus'
 
 const SIGNAL_LABELS: Record<string, string> = {
   pix_mention: 'Pix / dinheiro / transferência',
@@ -17,24 +19,12 @@ const SIGNAL_LABELS: Record<string, string> = {
 
 function RiskBadge({ level }: { level: string }) {
   if (level === 'dangerous') {
-    return (
-      <span className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1 rounded-full bg-danger-surface text-danger-dark">
-        Alto Risco
-      </span>
-    )
+    return <SystemStatusBadge icon={ShieldAlert} label="Alto risco" tone="attention" />
   }
   if (level === 'suspicious') {
-    return (
-      <span className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1 rounded-full bg-warning-surface text-warning-dark">
-        Suspeito
-      </span>
-    )
+    return <SystemStatusBadge icon={CircleAlert} label="Suspeito" tone="attention" />
   }
-  return (
-    <span className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1 rounded-full bg-success-surface text-success-dark">
-      Sem padrões de golpe
-    </span>
-  )
+  return <SystemStatusBadge icon={CheckCircle2} label="Sem padrões de golpe" tone="normal" />
 }
 
 function ResultCard({ result }: { result: CheckMessageResult }) {
@@ -45,9 +35,9 @@ function ResultCard({ result }: { result: CheckMessageResult }) {
   return (
     <Card className={
       result.risk_level === 'dangerous'
-        ? 'border-danger border-2'
+        ? 'border-attention border-2'
         : result.risk_level === 'suspicious'
-          ? 'border-warning border-2'
+          ? 'border-attention border-2'
           : 'border-success border-2'
     }>
       <CardHeader className="pb-3">
@@ -64,8 +54,9 @@ function ResultCard({ result }: { result: CheckMessageResult }) {
               {activeSignals.map((s) => (
                 <span
                   key={s.key}
-                  className="text-xs px-2 py-1 rounded-md bg-surface border border-border text-text"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-2 py-1 text-xs text-text"
                 >
+                  <CircleAlert className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                   {s.label}
                 </span>
               ))}
@@ -168,9 +159,15 @@ export default function ChatPage() {
       </form>
 
       {checkMutation.error && (
-        <p className="text-sm text-danger text-center">
-          {checkMutation.error.message}
-        </p>
+        <SystemStateNotice
+          icon={CircleAlert}
+          title="Não foi possível verificar a mensagem"
+          description={checkMutation.error.message}
+          tone="attention"
+          actionLabel="Tentar novamente"
+          onAction={() => text.trim() && checkMutation.mutate(text.trim(), { onSuccess: setResult })}
+          live="assertive"
+        />
       )}
 
       {result && <ResultCard result={result} />}

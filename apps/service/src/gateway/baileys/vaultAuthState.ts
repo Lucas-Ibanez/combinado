@@ -1,5 +1,7 @@
 import type { AuthenticationCreds, AuthenticationState, SignalDataTypeMap, SignalDataSet } from '@whiskeysockets/baileys'
-import { proto, initAuthCreds, BufferJSON } from '@whiskeysockets/baileys'
+import baileys from '@whiskeysockets/baileys'
+
+const { proto, initAuthCreds, BufferJSON } = baileys
 import { gatewayDb as db } from '../../shared/db/roles.js'
 import {
   generateDEK,

@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { Loader2 } from 'lucide-react'
 
 export default function ProtectedRoute() {
   const location = useLocation()
@@ -36,7 +37,10 @@ export default function ProtectedRoute() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface">
-        <p className="text-text-muted text-sm">Carregando...</p>
+        <p className="flex items-center gap-2 text-text-muted text-sm" role="status">
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          Verificando acesso...
+        </p>
       </div>
     )
   }

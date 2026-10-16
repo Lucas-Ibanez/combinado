@@ -3,6 +3,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { supabase } from '@/lib/supabase'
+import { Bell, BellOff, CheckCircle2, CircleAlert } from 'lucide-react'
+import { SystemStateNotice } from '@/components/common/SystemStatus'
 
 interface Props {
   onComplete: () => void
@@ -51,6 +53,13 @@ export default function StepTestNotification({ onComplete, onSkip }: Props) {
 
       if (error) throw new Error('Erro ao salvar subscription: ' + error.message)
 
+      await registration.showNotification('Combinado — Teste', {
+        body: 'Notificações funcionando! Você receberá alertas quando algo suspeito for detectado.',
+        icon: '/icon-192.svg',
+        badge: '/icon-192.svg',
+        tag: 'test-notification',
+      })
+
       return subJson
     },
     onSuccess: () => {
@@ -64,7 +73,7 @@ export default function StepTestNotification({ onComplete, onSkip }: Props) {
       <div className="space-y-6">
         <div className="text-center">
           <div className="w-14 h-14 rounded-full bg-success-surface flex items-center justify-center mx-auto mb-3">
-            <span className="text-2xl">🔔</span>
+            <CheckCircle2 className="h-7 w-7 text-success-dark" aria-hidden="true" />
           </div>
           <h2 className="text-xl font-bold text-text">Notificações Ativadas!</h2>
           <p className="text-sm text-text-muted mt-1">
@@ -82,7 +91,7 @@ export default function StepTestNotification({ onComplete, onSkip }: Props) {
     <div className="space-y-6">
       <div className="text-center mb-2">
         <div className="w-14 h-14 rounded-full bg-brand-surface flex items-center justify-center mx-auto mb-3">
-          <span className="text-2xl">🔔</span>
+          <Bell className="h-7 w-7 text-brand" aria-hidden="true" />
         </div>
         <h2 className="text-xl font-bold text-text">Testar Notificação</h2>
         <p className="text-sm text-text-muted mt-1">
@@ -104,19 +113,27 @@ export default function StepTestNotification({ onComplete, onSkip }: Props) {
           </p>
 
           {permissionDenied && (
-            <div className="bg-danger-surface rounded-lg p-3">
-              <p className="text-sm text-danger-dark">
-                Permissão negada. Vá nas configurações do navegador para ativar notificações deste site.
-              </p>
-            </div>
+            <SystemStateNotice
+              icon={BellOff}
+              title="Notificações bloqueadas"
+              description="Abra as configurações do navegador, permita notificações para este site e tente novamente."
+              tone="attention"
+              live="assertive"
+            />
           )}
         </CardContent>
       </Card>
 
       {subscribeMutation.error && !permissionDenied && (
-        <p className="text-sm text-danger text-center">
-          {subscribeMutation.error.message}
-        </p>
+        <SystemStateNotice
+          icon={CircleAlert}
+          title="Não foi possível ativar as notificações"
+          description={subscribeMutation.error.message}
+          tone="attention"
+          actionLabel="Tentar novamente"
+          onAction={() => subscribeMutation.mutate()}
+          live="assertive"
+        />
       )}
 
       <Button

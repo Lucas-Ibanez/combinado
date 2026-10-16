@@ -8,7 +8,6 @@ export interface ProtectedPersonStatus {
   baileys_status: string
   opted_in: boolean
   updated_at: string
-  panel_token: string | null
 }
 
 export interface GuardianInfo {
@@ -25,7 +24,7 @@ export function useProtectedPersons() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('protected_persons')
-        .select('id, display_name, phone, baileys_status, opted_in, updated_at, panel_token')
+        .select('id, display_name, phone, baileys_status, opted_in, updated_at')
         .order('display_name')
 
       if (error) throw error

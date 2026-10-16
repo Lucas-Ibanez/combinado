@@ -1,5 +1,9 @@
+import { useState } from 'react'
 import type { IncidentDelivery, Severity } from '@combinado/shared'
-import { Phone, ShieldAlert, UserPlus, MessageCircleWarning, PhoneCall } from 'lucide-react'
+import { CircleAlert, Phone, ShieldAlert, UserPlus, MessageCircleWarning, PhoneCall } from 'lucide-react'
+import EmotionalModeFrame from '@/components/common/EmotionalModeFrame'
+import { SystemStateNotice } from '@/components/common/SystemStatus'
+import CriticalActionDrawer from '@/components/common/CriticalActionDrawer'
 
 interface CrisisViewProps {
   personName: string
@@ -16,9 +20,9 @@ interface CrisisViewProps {
 
 const SEVERITY_HEADLINE: Record<Severity, string> = {
   critical: 'Pedido urgente de Pix detectado',
-  high: 'Mensagem suspeita detectada',
-  medium: 'Atividade incomum detectada',
-  low: 'Atividade para verificar',
+  high: 'Mensagem com sinais de personificação',
+  medium: 'Pedido precisa de confirmação imediata',
+  low: 'Contato precisa de confirmação',
 }
 
 function formatTimeShort(dateStr: string): string {
@@ -64,14 +68,18 @@ export default function CrisisView({
   const signals = parseSignals(summary)
   const currentStep = deliveries.filter((d) => !d.failure_reason && !d.acknowledged_at).length
   const totalSteps = deliveries.length
+  const [drawerAction, setDrawerAction] = useState<string | null>(null)
 
   return (
-    <div className="min-h-[calc(100vh-56px)] bg-danger-surface flex flex-col">
-      <div className="bg-danger px-4 py-5 text-danger-foreground">
+    <EmotionalModeFrame
+      mode="incident"
+      className="min-h-[calc(100vh-56px)] flex flex-col"
+    >
+      <div className="incident-signal-stripe px-4 py-5 text-danger-foreground">
         <div className="flex items-center gap-2 mb-2">
           <ShieldAlert className="w-6 h-6" />
           <span className="text-xs font-medium uppercase tracking-wide opacity-90">
-            Incidente ativo
+            Incidente ativo · Aja agora
           </span>
         </div>
         <h1 className="text-xl font-bold leading-tight">
@@ -91,22 +99,24 @@ export default function CrisisView({
             <ul className="space-y-1.5">
               {signals.map((s) => (
                 <li key={s} className="flex items-center gap-2 text-sm text-text">
-                  <span className="w-1.5 h-1.5 rounded-full bg-danger shrink-0" />
-                  {s}
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-danger/30 bg-danger-surface">
+                    <CircleAlert className="h-4 w-4 text-danger-dark" aria-hidden="true" />
+                  </span>
+                  <span>{s}</span>
                 </li>
               ))}
             </ul>
           </div>
         )}
 
-        <div className="rounded-xl bg-surface border border-brand/20 p-4">
-          <h2 className="text-sm font-semibold text-text mb-2 flex items-center gap-1.5">
-            <PhoneCall className="w-4 h-4 text-brand" />
-            Verifique por telefone primeiro
+        <div className="rounded-xl bg-surface border-2 border-danger p-4 shadow-sm">
+          <h2 className="text-lg font-bold text-danger-dark mb-2 flex items-center gap-2">
+            <PhoneCall className="w-5 h-5" />
+            Pare. Não faça Pix agora.
           </h2>
-          <p className="text-xs text-text-muted mb-3">
-            Ligue diretamente para {personName} — nao confirme pelo WhatsApp, que pode estar comprometido.
-            Use a senha combinada durante a ligacao para garantir que esta falando com a pessoa certa.
+          <p className="text-sm text-text mb-4">
+            Ligue diretamente para {personName}. Não confirme pelo WhatsApp.
+            Use a senha combinada durante a ligação.
           </p>
 
           <a
@@ -137,28 +147,34 @@ export default function CrisisView({
           </p>
 
           {ackError && (
-            <p className="text-sm text-danger text-center">{ackError}</p>
+            <SystemStateNotice
+              icon={CircleAlert}
+              title="Nao foi possivel registrar sua confirmacao"
+              description={ackError}
+              tone="incident"
+              live="assertive"
+            />
           )}
 
           <div className="grid grid-cols-1 gap-2">
             <button
               type="button"
               disabled={isPending}
-              onClick={() => onAcknowledge?.('safe_confirmed')}
+              onClick={() => setDrawerAction('safe_confirmed')}
               className="flex items-center gap-3 w-full rounded-xl border-2 border-brand bg-surface py-3.5 px-4 text-sm font-semibold text-brand transition-colors active:bg-brand-surface disabled:opacity-50"
             >
               <MessageCircleWarning className="w-5 h-5 shrink-0" />
-              {isPending ? 'Confirmando...' : 'Liguei e confirmei — esta tudo bem'}
+              {isPending && drawerAction === 'safe_confirmed' ? 'Confirmando...' : 'Liguei e confirmei — esta tudo bem'}
             </button>
 
             <button
               type="button"
               disabled={isPending}
-              onClick={() => onAcknowledge?.('threat_confirmed')}
+              onClick={() => setDrawerAction('threat_confirmed')}
               className="flex items-center gap-3 w-full rounded-xl border-2 border-danger bg-surface py-3.5 px-4 text-sm font-semibold text-danger transition-colors active:bg-danger-surface disabled:opacity-50"
             >
               <ShieldAlert className="w-5 h-5 shrink-0" />
-              {isPending ? 'Confirmando...' : 'Nao reconheco este pedido'}
+              {isPending && drawerAction === 'threat_confirmed' ? 'Confirmando...' : 'Nao reconheco este pedido'}
             </button>
 
             <button
@@ -176,7 +192,29 @@ export default function CrisisView({
             Ao confirmar, {personName} recebera uma notificacao por SMS ou ligacao (canal independente do WhatsApp).
           </p>
         </div>
+
+        <CriticalActionDrawer
+          open={drawerAction === 'safe_confirmed'}
+          onOpenChange={(open) => { if (!open) setDrawerAction(null) }}
+          title="Confirmar que esta tudo bem"
+          description={`Voce ligou para ${personName}, usou a senha combinada e confirmou que o pedido e legitimo.`}
+          confirmLabel="Deslize para confirmar"
+          onConfirm={() => onAcknowledge?.('safe_confirmed')}
+          disabled={isPending}
+          tone="brand"
+        />
+
+        <CriticalActionDrawer
+          open={drawerAction === 'threat_confirmed'}
+          onOpenChange={(open) => { if (!open) setDrawerAction(null) }}
+          title="Reportar ameaca"
+          description={`${personName} recebera um alerta por SMS/ligacao para NAO fazer nenhuma transferencia. Esta acao nao pode ser desfeita.`}
+          confirmLabel="Deslize para reportar ameaca"
+          onConfirm={() => onAcknowledge?.('threat_confirmed')}
+          disabled={isPending}
+          tone="danger"
+        />
       </div>
-    </div>
+    </EmotionalModeFrame>
   )
 }

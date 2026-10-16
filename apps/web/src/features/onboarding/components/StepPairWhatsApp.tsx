@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
+import { QRCodeSVG } from 'qrcode.react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { supabase } from '@/lib/supabase'
+import { CheckCircle2, CircleAlert, Loader2, Smartphone } from 'lucide-react'
+import { SystemStateNotice } from '@/components/common/SystemStatus'
 
 interface Props {
   protectedPersonId: string
@@ -11,7 +14,31 @@ interface Props {
 }
 
 export default function StepPairWhatsApp({ protectedPersonId, onComplete, onSkip }: Props) {
-  const [pairingStarted, setPairingStarted] = useState(false)
+  const [debugInfo, setDebugInfo] = useState('')
+
+  const { data: status, error: pollError } = useQuery({
+    queryKey: ['pairing-status', protectedPersonId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('protected_persons')
+        .select('baileys_status, baileys_pairing_qr')
+        .eq('id', protectedPersonId)
+        .maybeSingle()
+      if (error) {
+        setDebugInfo(`err: ${error.code} ${error.message}`)
+        throw error
+      }
+      if (!data) {
+        setDebugInfo(`no row for ${protectedPersonId.slice(0, 8)}`)
+        return null
+      }
+      setDebugInfo(`st=${data.baileys_status} qr=${data.baileys_pairing_qr ? data.baileys_pairing_qr.length + 'ch' : 'null'} id=${protectedPersonId.slice(0, 8)}`)
+      return data
+    },
+    refetchInterval: 2000,
+    staleTime: 0,
+    retry: 1,
+  })
 
   const pairMutation = useMutation({
     mutationFn: async () => {
@@ -22,34 +49,19 @@ export default function StepPairWhatsApp({ protectedPersonId, onComplete, onSkip
       if (!data?.ok) throw new Error(data?.error ?? 'Erro desconhecido')
       return data
     },
-    onSuccess: () => {
-      setPairingStarted(true)
-    },
-  })
-
-  const { data: status } = useQuery({
-    queryKey: ['pairing-status', protectedPersonId],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('protected_persons')
-        .select('baileys_status, baileys_pairing_qr')
-        .eq('id', protectedPersonId)
-        .single()
-      return data
-    },
-    enabled: pairingStarted,
-    refetchInterval: pairingStarted ? 3000 : false,
   })
 
   const isPaired = status?.baileys_status === 'paired'
+  const isPairing = status?.baileys_status === 'pairing' || status?.baileys_status === 'pairing_requested'
   const qrCode = status?.baileys_pairing_qr
+  const pairingStarted = pairMutation.isSuccess || isPairing
 
   if (isPaired) {
     return (
       <div className="space-y-6">
         <div className="text-center">
           <div className="w-14 h-14 rounded-full bg-success-surface flex items-center justify-center mx-auto mb-3">
-            <span className="text-2xl">✅</span>
+            <CheckCircle2 className="h-7 w-7 text-success-dark" aria-hidden="true" />
           </div>
           <h2 className="text-xl font-bold text-text">WhatsApp Pareado!</h2>
           <p className="text-sm text-text-muted mt-1">
@@ -67,7 +79,7 @@ export default function StepPairWhatsApp({ protectedPersonId, onComplete, onSkip
     <div className="space-y-6">
       <div className="text-center mb-2">
         <div className="w-14 h-14 rounded-full bg-brand-surface flex items-center justify-center mx-auto mb-3">
-          <span className="text-2xl">📱</span>
+          <Smartphone className="h-7 w-7 text-brand" aria-hidden="true" />
         </div>
         <h2 className="text-xl font-bold text-text">Parear WhatsApp</h2>
         <p className="text-sm text-text-muted mt-1">
@@ -109,13 +121,16 @@ export default function StepPairWhatsApp({ protectedPersonId, onComplete, onSkip
           <CardContent className="pt-6 flex flex-col items-center">
             <p className="text-sm font-medium text-text mb-3">Escaneie este QR Code:</p>
             <div className="bg-white p-4 rounded-lg border border-border">
-              <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrCode)}`}
-                alt="QR Code para pareamento"
-                className="w-48 h-48"
+              <QRCodeSVG
+                value={qrCode}
+                size={192}
+                level="M"
               />
             </div>
-            <p className="text-xs text-text-muted mt-3">Aguardando conexão...</p>
+            <p className="mt-3 flex items-center gap-2 text-xs text-text-muted" role="status">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+              Aguardando conexão...
+            </p>
           </CardContent>
         </Card>
       )}
@@ -123,15 +138,30 @@ export default function StepPairWhatsApp({ protectedPersonId, onComplete, onSkip
       {pairingStarted && !qrCode && (
         <Card>
           <CardContent className="pt-6 text-center">
-            <p className="text-sm text-text-muted">Gerando QR Code...</p>
+            <p className="flex items-center justify-center gap-2 text-sm text-text-muted" role="status">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+              Gerando QR Code...
+            </p>
           </CardContent>
         </Card>
       )}
 
-      {pairMutation.error && (
-        <p className="text-sm text-danger text-center">
-          {pairMutation.error.message}
+      {debugInfo && (
+        <p className="text-[10px] text-text-muted text-center font-mono break-all">
+          [debug] {debugInfo}
         </p>
+      )}
+
+      {(pairMutation.error || pollError) && (
+        <SystemStateNotice
+          icon={CircleAlert}
+          title="Erro no pareamento"
+          description={pairMutation.error?.message ?? (pollError as Error)?.message ?? 'Erro desconhecido'}
+          tone="attention"
+          actionLabel="Tentar novamente"
+          onAction={() => pairMutation.mutate()}
+          live="assertive"
+        />
       )}
 
       {!pairingStarted && (

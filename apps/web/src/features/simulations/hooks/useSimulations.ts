@@ -78,6 +78,10 @@ export function useSimulations(protectedPersonId: string | null) {
     },
     enabled: !!protectedPersonId,
     staleTime: 1000 * 15,
+    refetchInterval: (query) => {
+      const pending = query.state.data?.stats?.pending ?? 0
+      return pending > 0 ? 3000 : false
+    },
   })
 }
 

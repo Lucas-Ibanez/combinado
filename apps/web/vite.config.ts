@@ -18,7 +18,7 @@ export default defineConfig({
         name: 'Combinado — Proteção Familiar',
         short_name: 'Combinado',
         description: 'Proteja sua família contra golpes de personificação por IA.',
-        theme_color: '#16A34A',
+        theme_color: '#1F4D3F',
         background_color: '#FFFFFF',
         display: 'standalone',
         orientation: 'portrait',

@@ -79,21 +79,42 @@ export async function startSimulationWorker(
     }
 
     const sock = officialSession.socket()
+    const health = officialSession.health()
     if (!sock) {
       log.warn('simulation: sessão oficial desconectada, aguardando retry', {
         simulation_id: job.simulation_id,
-        health: officialSession.health(),
+        health,
       })
       throw new Error('official_session_disconnected')
     }
 
-    const jid = phoneToJid(pp.phone)
+    const rawJid = phoneToJid(pp.phone)
+
+    const [onWa] = await sock.onWhatsApp(rawJid) ?? []
+    if (!onWa?.exists) {
+      log.warn('simulation: número não encontrado no WhatsApp', {
+        simulation_id: job.simulation_id,
+        raw_jid: rawJid.replace(/\d(?=\d{4}@)/, '*'),
+      })
+      return
+    }
+    const jid = onWa.jid
+
     const text = buildSimulationMessage(pp.display_name)
+
+    log.info('simulation: enviando mensagem', {
+      simulation_id: job.simulation_id,
+      target_jid: jid.replace(/\d(?=\d{4}@)/, '*'),
+      raw_jid: rawJid.replace(/\d(?=\d{4}@)/, '*'),
+      session_health: health,
+      socket_user: sock.user?.id ? 'present' : 'absent',
+    })
 
     await randomDelay(2_000, 5_000)
 
     const result = await sock.sendMessage(jid, { text })
     const messageId = result?.key?.id ?? null
+    const messageStatus = result?.status ?? null
 
     await db
       .from('simulations')
@@ -103,6 +124,7 @@ export async function startSimulationWorker(
     log.info('simulation: mensagem enviada ao protegido', {
       simulation_id: job.simulation_id,
       message_id: messageId,
+      message_status: messageStatus,
     })
   }
 

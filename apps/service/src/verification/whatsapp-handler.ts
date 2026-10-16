@@ -5,7 +5,7 @@ import { verificationDb as db } from '../shared/db/roles.js'
 import { assessText } from './assess.js'
 
 function jidToPhone(jid: string): string {
-  return '+' + jid.replace(/@.*/, '').replace(/:\d+$/, '')
+  return jid.replace(/@.*/, '').replace(/:\d+$/, '')
 }
 
 function randomDelay(minMs: number, maxMs: number): Promise<void> {
@@ -17,14 +17,25 @@ export function attachVerificationHandler(
   officialSession: OfficialSessionHandle,
   log: Logger,
 ): void {
-  const sock = officialSession.socket()
-  if (!sock) {
-    log.warn('verification-handler: sem socket')
-    return
+  let attached = false
+
+  function tryAttach() {
+    if (attached) return
+    const sock = officialSession.socket()
+    if (!sock) return
+    attachListener(sock, officialSession, log)
+    attached = true
+    log.info('verification-handler: handler anexado à sessão oficial')
   }
 
-  attachListener(sock, officialSession, log)
-  log.info('verification-handler: handler anexado à sessão oficial')
+  tryAttach()
+  if (!attached) {
+    log.info('verification-handler: socket ainda não disponível, aguardando conexão...')
+    const interval = setInterval(() => {
+      tryAttach()
+      if (attached) clearInterval(interval)
+    }, 3_000)
+  }
 }
 
 function attachListener(
