@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { QRCodeSVG } from 'qrcode.react'
 import { Button } from '@/components/ui/button'
@@ -13,6 +14,8 @@ interface Props {
 }
 
 export default function StepPairWhatsApp({ protectedPersonId, onComplete, onSkip }: Props) {
+  const [debugInfo, setDebugInfo] = useState('')
+
   const { data: status, error: pollError } = useQuery({
     queryKey: ['pairing-status', protectedPersonId],
     queryFn: async () => {
@@ -20,11 +23,21 @@ export default function StepPairWhatsApp({ protectedPersonId, onComplete, onSkip
         .from('protected_persons')
         .select('baileys_status, baileys_pairing_qr')
         .eq('id', protectedPersonId)
-        .single()
-      if (error) throw error
+        .maybeSingle()
+      if (error) {
+        setDebugInfo(`err: ${error.code} ${error.message}`)
+        throw error
+      }
+      if (!data) {
+        setDebugInfo(`no row for ${protectedPersonId.slice(0, 8)}`)
+        return null
+      }
+      setDebugInfo(`st=${data.baileys_status} qr=${data.baileys_pairing_qr ? data.baileys_pairing_qr.length + 'ch' : 'null'} id=${protectedPersonId.slice(0, 8)}`)
       return data
     },
-    refetchInterval: 3000,
+    refetchInterval: 2000,
+    staleTime: 0,
+    retry: 1,
   })
 
   const pairMutation = useMutation({
@@ -131,6 +144,12 @@ export default function StepPairWhatsApp({ protectedPersonId, onComplete, onSkip
             </p>
           </CardContent>
         </Card>
+      )}
+
+      {debugInfo && (
+        <p className="text-[10px] text-text-muted text-center font-mono break-all">
+          [debug] {debugInfo}
+        </p>
       )}
 
       {(pairMutation.error || pollError) && (
