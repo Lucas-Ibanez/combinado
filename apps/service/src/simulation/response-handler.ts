@@ -7,21 +7,32 @@ import { evaluateResponse } from './messages.js'
 const SIMULATION_EXPIRY_HOURS = 24
 
 function jidToPhone(jid: string): string {
-  return '+' + jid.replace(/@.*/, '').replace(/:\d+$/, '')
+  return jid.replace(/@.*/, '').replace(/:\d+$/, '')
 }
 
 export function attachSimulationResponseHandler(
   officialSession: OfficialSessionHandle,
   log: Logger,
 ): void {
-  const sock = officialSession.socket()
-  if (!sock) {
-    log.warn('simulation-response: sem socket, handler será anexado no próximo check')
-    return
+  let attached = false
+
+  function tryAttach() {
+    if (attached) return
+    const sock = officialSession.socket()
+    if (!sock) return
+    attachListener(sock, log)
+    attached = true
+    log.info('simulation-response: handler anexado à sessão oficial')
   }
 
-  attachListener(sock, log)
-  log.info('simulation-response: handler anexado à sessão oficial')
+  tryAttach()
+  if (!attached) {
+    log.info('simulation-response: socket ainda não disponível, aguardando conexão...')
+    const interval = setInterval(() => {
+      tryAttach()
+      if (attached) clearInterval(interval)
+    }, 3_000)
+  }
 }
 
 function attachListener(sock: WASocket, log: Logger): void {

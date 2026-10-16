@@ -5,6 +5,7 @@ import {
   fetchLatestBaileysVersion,
   type WASocket,
 } from '@whiskeysockets/baileys'
+import qrcode from 'qrcode-terminal'
 import type { Logger } from '../../shared/logging/index.js'
 import { loadOfficialAuthState } from '../../gateway/baileys/authState.js'
 
@@ -24,12 +25,14 @@ function jitteredDelay(attempt: number): number {
   return base + jitter
 }
 
-const silentLogger: any = (() => {
+const quietLogger: any = (() => {
   const noop = () => {}
   const l: any = {
     trace: noop, debug: noop, info: noop,
-    warn: noop, error: noop, fatal: noop,
-    level: 'silent',
+    warn: (...args: unknown[]) => console.warn('[baileys-warn]', ...args),
+    error: (...args: unknown[]) => console.error('[baileys-error]', ...args),
+    fatal: (...args: unknown[]) => console.error('[baileys-fatal]', ...args),
+    level: 'warn',
   }
   l.child = () => l
   return l
@@ -59,20 +62,49 @@ export async function startOfficialSession(
       version,
       auth: state,
       browser: Browsers.ubuntu('Chrome'),
-      logger: silentLogger,
+      logger: quietLogger,
+      syncFullHistory: false,
+      fireInitQueries: false,
+      markOnlineOnConnect: false,
+      defaultQueryTimeoutMs: 60_000,
     })
 
     sock.ev.on('creds.update', saveCreds)
 
+    const officialPhone = process.env.OFFICIAL_PHONE
     if (!hasCreds && !sock.authState.creds.registered) {
-      log.warn('official-session: sem credenciais — precisa parear. Use pair-official-device')
+      if (officialPhone) {
+        log.info('official-session: solicitando código de pareamento', { phone: officialPhone.slice(-4) })
+        setTimeout(async () => {
+          try {
+            const code = await sock!.requestPairingCode(officialPhone)
+            const formatted = code.length === 8 ? `${code.slice(0, 4)}-${code.slice(4)}` : code
+            log.info(`official-session: CÓDIGO DE PAREAMENTO: ${formatted}`)
+            // eslint-disable-next-line no-console
+            console.log(`\n${'='.repeat(50)}`)
+            // eslint-disable-next-line no-console
+            console.log(`  CÓDIGO DE PAREAMENTO: ${formatted}`)
+            // eslint-disable-next-line no-console
+            console.log(`  WhatsApp > Dispositivos Conectados > Conectar`)
+            // eslint-disable-next-line no-console
+            console.log(`  > Vincular com número de telefone > digite o código`)
+            // eslint-disable-next-line no-console
+            console.log(`${'='.repeat(50)}\n`)
+          } catch (err) {
+            log.error('official-session: falha ao solicitar código', { error_name: (err as Error).name })
+          }
+        }, 3_000)
+      } else {
+        log.warn('official-session: sem credenciais — defina OFFICIAL_PHONE no .env para parear por código, ou escaneie o QR abaixo')
+      }
     }
 
     sock.ev.on('connection.update', (update) => {
       const { connection, lastDisconnect, qr } = update
 
       if (qr) {
-        log.info('official-session: QR code gerado — escaneie com o WhatsApp Business do número oficial')
+        log.info('official-session: QR code gerado — escaneie com o WhatsApp do número oficial')
+        qrcode.generate(qr, { small: true })
       }
 
       if (connection === 'open') {
