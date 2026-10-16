@@ -77,12 +77,26 @@ export default function DashboardPage() {
         {startMutation.isPending ? 'Enviando...' : 'Simular alerta'}
       </Button>
 
-      {startMutation.isSuccess && (
+      {stats && stats.pending > 0 && (
+        <SystemStateNotice
+          icon={Loader2}
+          title="Aguardando resposta"
+          description="A simulação foi enviada. Aguardando a resposta do protegido..."
+          tone="normal"
+          className="mt-3 w-full max-w-xs text-left [&>svg:first-child]:animate-spin"
+        />
+      )}
+
+      {startMutation.isSuccess && stats && stats.pending === 0 && (
         <SystemStateNotice
           icon={CheckCircle2}
-          title="Simulação enviada"
-          description="Aguarde a resposta do protegido."
-          tone="normal"
+          title="Resposta recebida"
+          description={
+            simData?.rows?.[0]?.response_correct
+              ? 'O protegido identificou corretamente a simulação!'
+              : 'O protegido não identificou a simulação. Considere reforçar o treinamento.'
+          }
+          tone={simData?.rows?.[0]?.response_correct ? 'normal' : 'attention'}
           className="mt-3 w-full max-w-xs text-left"
         />
       )}
